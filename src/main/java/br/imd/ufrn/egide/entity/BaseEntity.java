@@ -1,4 +1,4 @@
-package br.imd.ufrn.egide.ia.models;
+package br.imd.ufrn.egide.entity;
 
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
@@ -42,6 +42,5 @@ public abstract class BaseEntity {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-
 
 }

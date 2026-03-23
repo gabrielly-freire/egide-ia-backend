@@ -1,4 +1,4 @@
-package br.imd.ufrn.egide.ia;
+package br.imd.ufrn.egide;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

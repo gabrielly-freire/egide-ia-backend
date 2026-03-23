@@ -1,6 +1,6 @@
-package br.imd.ufrn.egide.ia.models;
+package br.imd.ufrn.egide.entity;
 
-import br.imd.ufrn.egide.ia.models.enums.Role;
+import br.imd.ufrn.egide.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
@@ -8,7 +8,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Data
 @Entity
 @SQLRestriction(value = "active = true")
-public class UserInfo extends BaseEntity {
+public class UserInfoEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

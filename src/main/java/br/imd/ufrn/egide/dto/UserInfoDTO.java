@@ -1,6 +1,6 @@
-package br.imd.ufrn.egide.ia.dtos;
+package br.imd.ufrn.egide.dto;
 
-import br.imd.ufrn.egide.ia.models.enums.Role;
+import br.imd.ufrn.egide.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

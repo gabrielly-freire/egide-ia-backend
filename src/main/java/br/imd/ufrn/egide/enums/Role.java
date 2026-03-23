@@ -1,4 +1,4 @@
-package br.imd.ufrn.egide.ia.models.enums;
+package br.imd.ufrn.egide.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

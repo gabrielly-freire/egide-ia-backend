@@ -1,4 +1,4 @@
-package br.imd.ufrn.egide.ia.configuration;
+package br.imd.ufrn.egide.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

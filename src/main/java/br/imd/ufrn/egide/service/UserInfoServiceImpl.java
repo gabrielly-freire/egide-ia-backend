@@ -1,11 +1,11 @@
-package br.imd.ufrn.egide.ia.services;
+package br.imd.ufrn.egide.service;
 
-import br.imd.ufrn.egide.ia.dtos.UserInfoDTO;
-import br.imd.ufrn.egide.ia.mappers.UserInfoMapper;
-import br.imd.ufrn.egide.ia.models.UserInfo;
-import br.imd.ufrn.egide.ia.repositories.UserInfoRepository;
-import br.imd.ufrn.egide.ia.utils.exceptions.BusinessException;
-import br.imd.ufrn.egide.ia.utils.exceptions.ResourceNotFoundException;
+import br.imd.ufrn.egide.dto.UserInfoDTO;
+import br.imd.ufrn.egide.entity.UserInfoEntity;
+import br.imd.ufrn.egide.mapper.UserInfoMapper;
+import br.imd.ufrn.egide.repository.UserInfoRepository;
+import br.imd.ufrn.egide.utils.exception.BusinessException;
+import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,32 +14,32 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class UserInfoService {
+public class UserInfoServiceImpl implements UserInfoService {
     private final UserInfoRepository userInfoRepository;
     private final UserInfoMapper userInfoMapper;
 
     public UserInfoDTO save(UserInfoDTO userInfo) {
-        if (userInfoRepository.existsUserInfoByEmail(userInfo.email())){
+        if (userInfoRepository.existsUserInfoByEmail(userInfo.email())) {
             throw new BusinessException("Já existe um usuário com este email.", HttpStatus.CONFLICT);
         }
 
-        if (userInfoRepository.existsUserInfoByUsername(userInfo.username())){
+        if (userInfoRepository.existsUserInfoByUsername(userInfo.username())) {
             throw new BusinessException("Já existe um usuário com este username.", HttpStatus.CONFLICT);
         }
 
-        UserInfo user = userInfoMapper.toUserInfo(userInfo);
+        UserInfoEntity user = userInfoMapper.toUserInfoEntity(userInfo);
         user = userInfoRepository.save(user);
         return userInfoMapper.toUserInfoDTO(user);
     }
 
     public UserInfoDTO get(Long id) {
-        UserInfo user = userInfoRepository.findById(id).orElseThrow(
-                () ->  new ResourceNotFoundException("Usuário não encontrado"));
+        UserInfoEntity user = userInfoRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Usuário não encontrado"));
         return userInfoMapper.toUserInfoDTO(user);
     }
 
     public Page<UserInfoDTO> list(Pageable pageable) {
-        Page<UserInfo> users = userInfoRepository.findAllPage(pageable);
+        Page<UserInfoEntity> users = userInfoRepository.findAllPage(pageable);
         return users.map(userInfoMapper::toUserInfoDTO);
     }
 
@@ -47,7 +47,7 @@ public class UserInfoService {
         userInfoRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Usuário não encontrado"));
 
-        UserInfo user = userInfoMapper.toUserInfo(userInfo);
+        UserInfoEntity user = userInfoMapper.toUserInfoEntity(userInfo);
         user.setId(id);
         user = userInfoRepository.save(user);
         return userInfoMapper.toUserInfoDTO(user);

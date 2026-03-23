@@ -1,4 +1,4 @@
-package br.imd.ufrn.egide.ia.dtos;
+package br.imd.ufrn.egide.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;

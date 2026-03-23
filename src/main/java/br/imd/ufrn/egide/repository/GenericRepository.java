@@ -1,7 +1,7 @@
-package br.imd.ufrn.egide.ia.repositories;
+package br.imd.ufrn.egide.repository;
 
-import br.imd.ufrn.egide.ia.models.BaseEntity;
-import br.imd.ufrn.egide.ia.utils.exceptions.BusinessException;
+import br.imd.ufrn.egide.entity.BaseEntity;
+import br.imd.ufrn.egide.utils.exception.BusinessException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;

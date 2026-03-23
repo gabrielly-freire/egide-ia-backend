@@ -1,4 +1,4 @@
-package br.imd.ufrn.egide.ia.configuration;
+package br.imd.ufrn.egide.configuration;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import br.imd.ufrn.egide.ia.dtos.ErrorMessage;
-import br.imd.ufrn.egide.ia.utils.exceptions.BusinessException;
-import br.imd.ufrn.egide.ia.utils.exceptions.ResourceNotFoundException;
+import br.imd.ufrn.egide.dto.ErrorMessage;
+import br.imd.ufrn.egide.utils.exception.BusinessException;
+import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 
 @ControllerAdvice
 public class HandlerGlobalException {

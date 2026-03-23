@@ -1,7 +1,7 @@
-package br.imd.ufrn.egide.ia.controllers;
+package br.imd.ufrn.egide.controller;
 
-import br.imd.ufrn.egide.ia.dtos.UserInfoDTO;
-import br.imd.ufrn.egide.ia.services.UserInfoService;
+import br.imd.ufrn.egide.dto.UserInfoDTO;
+import br.imd.ufrn.egide.service.UserInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

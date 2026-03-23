@@ -1,4 +1,4 @@
-package br.imd.ufrn.egide.ia.utils.exceptions;
+package br.imd.ufrn.egide.utils.exception;
 
 
 import org.springframework.http.HttpStatus;

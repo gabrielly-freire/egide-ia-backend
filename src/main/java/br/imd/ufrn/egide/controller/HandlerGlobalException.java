@@ -1,4 +1,4 @@
-package br.imd.ufrn.egide.configuration;
+package br.imd.ufrn.egide.controller;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;

@@ -54,5 +54,5 @@ A aplicação iniciará por padrão na porta **8081** com o context-path **/api*
 ## Equipe
 
 - Francisca Gabrielly Lopes Freire [(gabrielly-freire)](https://github.com/gabrielly-freire)
-- Gabriel Ribeiro Barbosa da Silva [()]()
-- Nicole Carvalho Nogueira [()]()
+- Gabriel Ribeiro Barbosa da Silva [(gabriel-ribeiro-099)](https://github.com/gabriel-ribeiro-099)
+- Nicole Carvalho Nogueira [(nicolecnogueira)](https://github.com/nicolecnogueira)

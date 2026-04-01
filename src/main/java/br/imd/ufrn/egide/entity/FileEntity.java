@@ -17,4 +17,7 @@ public class FileEntity extends BaseEntity {
     private String path;
     private String contentType;
     private Long size;
+    @ManyToOne
+    @JoinColumn(name = "report_id")
+    private ReportEntity report;
 }

@@ -6,9 +6,10 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum Role {
-    ADMIN("Administrador"),
-    OMBUDSMAN("Ouvidor"),
-    USER("Usuário comum");
+    REMONSTRANT("Reclamante"),
+    LISTENER("Ouvidor"),
+    MANAGER("Gestor"),
+    ADMIN("Administrador");
 
     private String description;
 }

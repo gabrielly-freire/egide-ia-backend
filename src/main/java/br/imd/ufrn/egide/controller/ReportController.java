@@ -1,8 +1,8 @@
 package br.imd.ufrn.egide.controller;
 
 import br.imd.ufrn.egide.dto.ReportDTO;
-import br.imd.ufrn.egide.entity.ReportEntity;
-import br.imd.ufrn.egide.service.ReportServiceImpl;
+import br.imd.ufrn.egide.enums.ReportCategory;
+import br.imd.ufrn.egide.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Denúncia", description = "Gerenciamento de denúncias")
 public class ReportController {
 
-    private final ReportServiceImpl reportService;
+    private final ReportService reportService;
 
     @PostMapping
     @Operation(summary = "Criar uma nova denúncia")
@@ -26,7 +26,13 @@ public class ReportController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar denúncia por ID")
-    public ResponseEntity<ReportEntity> get(@PathVariable Long id) {
+    public ResponseEntity<ReportDTO> get(@PathVariable Long id) {
         return ResponseEntity.ok(reportService.getById(id));
+    }
+
+    @Operation(summary = "Triagem de categoria da denúncia")
+    @PatchMapping("{id}/category")
+    public ResponseEntity<ReportDTO> updateCategory(@PathVariable Long id, @RequestBody ReportCategory category) {
+        return ResponseEntity.ok(reportService.updateCategory(id, category));
     }
 }

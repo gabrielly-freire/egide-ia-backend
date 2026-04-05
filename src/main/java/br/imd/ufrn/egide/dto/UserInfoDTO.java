@@ -23,8 +23,11 @@ public record UserInfoDTO(
         @NotBlank(message = "A senha é obrigatória")
         @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
         String password,
-        
+
         @NotNull(message = "O papel (role) é obrigatório")
-        Role role
+        Role role,
+
+        @NotNull(message = "O departamento é obrigatório")
+        Long departmentId
 ) {
 }

@@ -2,6 +2,7 @@ package br.imd.ufrn.egide.service;
 
 import br.imd.ufrn.egide.dto.ReportDTO;
 import br.imd.ufrn.egide.entity.ReportEntity;
+import br.imd.ufrn.egide.enums.ReportCategory;
 import br.imd.ufrn.egide.enums.ReportStatus;
 import br.imd.ufrn.egide.mapper.ReportMapper;
 import br.imd.ufrn.egide.repository.ReportRepository;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class ReportServiceImpl {
+public class ReportServiceImpl implements ReportService {
+
     private final ReportRepository reportRepository;
     private final ReportMapper reportMapper;
 
+    @Override
     @Transactional
     public ReportDTO save(ReportDTO reportDTO) {
         ReportEntity entity = reportMapper.toEntity(reportDTO);
@@ -26,8 +29,20 @@ public class ReportServiceImpl {
         return reportMapper.toDTO(entity);
     }
 
-    public ReportEntity getById(Long id) {
-        return reportRepository.findById(id)
+    public ReportDTO getById(Long id) {
+        ReportEntity entity = reportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Denúncia não encontrada"));
+
+        return reportMapper.toDTO(entity);
+    }
+
+    @Override
+    public ReportDTO updateCategory(Long id, ReportCategory category) {
+        ReportEntity entity = reportRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Denúncia não encontrada"));
+        entity.setCategory(category);
+
+        entity = reportRepository.save(entity);
+        return reportMapper.toDTO(entity);
     }
 }

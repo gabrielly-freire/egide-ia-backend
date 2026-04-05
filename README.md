@@ -6,7 +6,7 @@ Projeto desenvolvido para a disciplina de Projeto Detalhado de Software discipli
 
 ## Tecnologias utilizadas
 
-- **Java 25**
+- **Java 21**
 - **Spring Boot 4.0.4**
 - **Spring Data JPA** (Persistência de dados)
 - **Spring Web** (API RESTful)
@@ -32,7 +32,7 @@ Antes de começar, você vai precisar ter instalado em sua máquina as seguintes
 A aplicação utiliza o PostgreSQL. Você pode subir o banco de dados facilmente usando o Docker Compose:
 
 ```powershell
-docker-compose up -d
+docker-compose up postgres -d
 ```
 
 O banco de dados estará disponível na porta `5434` (conforme configurado no `docker-compose.yaml`).

@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @AllArgsConstructor
 @RestController
@@ -22,6 +23,12 @@ public class ReportController {
     @Operation(summary = "Criar uma nova denúncia")
     public ResponseEntity<ReportDTO> create(@Valid @RequestBody ReportDTO reportDTO) {
         return ResponseEntity.ok(reportService.save(reportDTO));
+    }
+
+    @GetMapping
+    @Operation(summary = "Listar todas as denúncias")
+    public ResponseEntity<List<ReportDTO>> listAll() {
+        return ResponseEntity.ok(reportService.findAll());
     }
 
     @GetMapping("/{id}")

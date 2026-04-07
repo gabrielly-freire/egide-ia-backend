@@ -10,6 +10,8 @@ import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -27,6 +29,13 @@ public class ReportServiceImpl implements ReportService {
         entity = reportRepository.save(entity);
 
         return reportMapper.toDTO(entity);
+    }
+
+    public List<ReportDTO> findAll() {
+        return reportRepository.findAll()
+                .stream()
+                .map(reportMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     public ReportDTO getById(Long id) {

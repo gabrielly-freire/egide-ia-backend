@@ -5,6 +5,7 @@ import br.imd.ufrn.egide.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/v1/files")
+@Tag(name = "Arquivo", description = "Gerenciamento de arquivos")
 public class FileController {
 
     private final FileService fileService;
@@ -32,8 +34,8 @@ public class FileController {
     })
     @PostMapping("/upload")
     public ResponseEntity upload(
-            @RequestParam("file") List<MultipartFile> file) {
-        fileService.upload(file);
+            @RequestParam("files") List<MultipartFile> files) {
+        fileService.upload(files);
         return ResponseEntity.ok().build();
     }
 

@@ -11,6 +11,14 @@ public record ReportDTO(
         @NotBlank(message = "A descrição é obrigatória")
         String description,
 
-        String status
+        String anonymizedDescription,
+
+        String status,
+
+        String category,
+
+        Boolean hasConflict,
+
+        Long userInfoId
 ) {
 }

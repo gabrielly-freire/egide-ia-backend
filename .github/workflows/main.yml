@@ -1,0 +1,150 @@
+name: CI - Égide IA
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+env:
+  JAVA_VERSION: 21
+
+jobs:
+  # --- ETAPA DE LINT, ANALISE ESTATICA DO CÓDIGO, TESTES, BUILD E PUSH NO DOCKERHUB (CI) ---
+  lint:
+    name: Check code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+      - name: Run Checkstyle
+        run: mvn validate
+
+  spotbugs:
+    name: SpotBugs analysis
+    needs: lint # só vai rodar se a etapa de lint passar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+      - name: Run SpotBugs
+        run: mvn compile spotbugs:check
+      - name: Upload SpotBugs report
+        if: always() # Garante que o relatório seja salvo mesmo se encontrar falhas
+        uses: actions/upload-artifact@v5
+        with:
+          name: spotbugs-report
+          path: target/spotbugsXml.xml
+
+  test:
+    name: Unit & integration tests
+    needs: spotbugs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+      - name: Run Tests
+        run: mvn test jacoco:report -Dspring.profiles.active=test
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: coverage-report
+          path: target/site/jacoco/
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: test-report
+          path: target/surefire-reports/
+
+  build:
+    name: Build and push application
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+      - name: Verify JAR builds correctly
+        run: mvn package -DskipTests
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/sgam:latest
+
+    # --- ETAPA DE SEGURANÇA (APENAS NA MAIN) * ---
+  security-scan:
+    name: Dependency vulnerability scan
+    if: github.ref == 'refs/heads/main' # *
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run OWASP Dependency Check
+        # Este comando baixa a base de dados de CVEs (Common Vulnerabilities and Exposures) e verifica seu pom.xml
+        run: mvn org.owasp:dependency-check-maven:check
+        continue-on-error: true # Não falha o build, apenas reporta
+
+      - name: Upload Scan Report
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: dependency-check-report
+          path: target/dependency-check-report.html
+
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/sgam:latest
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+# --- ETAPA DE DEPLOY (CD) ---
+#  deploy: # CD da aplicação
+#    name: Deploy to production
+#
+#  destroy: # Facilidade da remocao dos recursos
+#    name: Destroy production

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+<!--    Permite retornar/receber Listas sem precisar cloná-las em models e dtos -->
+    <Match>
+        <Package name="~br\.ufrn\.imd\.sgam\.(dto|model).*" />
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2" />
+    </Match>
+
+<!--    Permite que o Spring injete os Services no construtor via lombok.-->
+    <Match>
+        <Class name="~.*Controller" />
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+
+<!--    Para de reclamar do código interno gerado pelo @Builder do Lombok.-->
+    <Match>
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR" />
+        <Class name="~.*Builder" />
+    </Match>
+</FindBugsFilter>

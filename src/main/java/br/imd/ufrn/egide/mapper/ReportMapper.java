@@ -12,5 +12,8 @@ public interface ReportMapper {
     ReportDTO toDTO(ReportEntity entity);
 
     @Mapping(source = "userInfoId", target = "userInfo.id")
+    @Mapping(target = "reportProcessed", ignore = true)
+    @Mapping(target = "reportAiAnalysed", ignore = true)
     ReportEntity toEntity(ReportDTO dto);
+
 }

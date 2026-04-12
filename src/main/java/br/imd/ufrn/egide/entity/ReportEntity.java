@@ -1,7 +1,5 @@
 package br.imd.ufrn.egide.entity;
 
-import br.imd.ufrn.egide.enums.ReportCategory;
-import br.imd.ufrn.egide.enums.ReportStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
@@ -19,6 +17,7 @@ public class ReportEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String protocolNumber;
 
     @Column(nullable = false)
@@ -27,17 +26,7 @@ public class ReportEntity extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
-    private String anonymizedDescription;
-
     private LocalDate dateOfOccurrence;
-
-    @Enumerated(EnumType.STRING)
-    private ReportStatus status;
-
-    @Enumerated(EnumType.STRING)
-    private ReportCategory category;
-
-    private Boolean hasConflict;
 
     @ManyToOne
     @JoinColumn(name = "user_info_id")
@@ -48,4 +37,7 @@ public class ReportEntity extends BaseEntity {
 
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
     private ReportProcessedEntity reportProcessed;
+
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    private ReportAiAnalysedEntity reportAiAnalysed;
 }

@@ -1,6 +1,7 @@
 package br.imd.ufrn.egide.service;
 
 import br.imd.ufrn.egide.entity.FileEntity;
+import br.imd.ufrn.egide.entity.ReportEntity;
 import br.imd.ufrn.egide.repository.FileRepository;
 import br.imd.ufrn.egide.utils.exception.BusinessException;
 import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
@@ -28,10 +29,8 @@ public class FileServiceImpl implements FileService {
     private final FileRepository fileRepository;
 
     @Override
-    public void upload(List<MultipartFile> files) {
-
+    public void upload(List<MultipartFile> files, ReportEntity report) {
         for (MultipartFile file : files) {
-
             validateFile(file);
 
             try {
@@ -46,6 +45,7 @@ public class FileServiceImpl implements FileService {
                 entity.setPath(path.toString());
                 entity.setContentType(file.getContentType());
                 entity.setSize(file.getSize());
+                entity.setReport(report);
 
                 fileRepository.save(entity);
 

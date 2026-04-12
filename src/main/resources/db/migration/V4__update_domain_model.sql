@@ -16,10 +16,7 @@ ALTER TABLE user_info
 
 ALTER TABLE report
     ADD COLUMN protocol_number VARCHAR(255),
-    ADD COLUMN anonymized_description TEXT,
-    ADD COLUMN category VARCHAR(50),
     ADD COLUMN date_of_occurrence DATE,
-    ADD COLUMN has_conflict BOOLEAN,
     ADD COLUMN user_info_id BIGINT;
 
 ALTER TABLE report
@@ -30,8 +27,8 @@ CREATE TABLE report_processed (
     active       BOOLEAN DEFAULT TRUE,
     created_at   TIMESTAMP WITHOUT TIME ZONE,
     updated_at   TIMESTAMP WITHOUT TIME ZONE,
-    title        VARCHAR(255),
-    description  TEXT,
+    title_anonymized        VARCHAR(255),
+    description_anonymized  TEXT,
     category     VARCHAR(50),
     status       VARCHAR(50),
     has_conflict BOOLEAN,

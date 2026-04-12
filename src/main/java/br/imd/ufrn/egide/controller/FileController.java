@@ -12,9 +12,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @AllArgsConstructor
 @RestController
@@ -23,21 +20,6 @@ import java.util.List;
 public class FileController {
 
     private final FileService fileService;
-
-    @Operation(summary = "Upload de arquivos")
-    @ApiResponses(value = {
-            @ApiResponse(description = "Upload realizado com sucesso.", responseCode = "200"),
-            @ApiResponse(description = "Arquivo vazio ou maior que o tamanho definido.", responseCode = "400"),
-            @ApiResponse(description = "Tipo de arquivo não suportado", responseCode = "415"),
-            @ApiResponse(description = "Erro interno do servidor", responseCode = "500"),
-
-    })
-    @PostMapping("/upload")
-    public ResponseEntity upload(
-            @RequestParam("files") List<MultipartFile> files) {
-        fileService.upload(files);
-        return ResponseEntity.ok().build();
-    }
 
     @Operation(summary = "Download de arquivos")
     @ApiResponses(value = {

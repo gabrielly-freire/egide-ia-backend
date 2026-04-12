@@ -4,19 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 
-public record ReportDTO(
-        Long id,
-
-        String protocolNumber,
-
+public record ReportRequestDTO(
         @NotBlank(message = "O título é obrigatório")
         String title,
 
         @NotBlank(message = "A descrição é obrigatória")
         String description,
 
-        LocalDate dateOfOccurrence,
-
-        Long userInfoId
+        LocalDate dateOfOccurrence
 ) {
 }

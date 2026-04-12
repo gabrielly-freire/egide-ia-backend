@@ -2,24 +2,17 @@ package br.imd.ufrn.egide.entity;
 
 import br.imd.ufrn.egide.enums.ReportCategory;
 import br.imd.ufrn.egide.enums.ReportRisk;
-import br.imd.ufrn.egide.enums.ReportStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
-@Table(name = "report_processed")
+@Table(name = "report_ai_analysed")
 @SQLRestriction(value = "active = true")
-public class ReportProcessedEntity extends BaseEntity {
+public class ReportAiAnalysedEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,12 +28,13 @@ public class ReportProcessedEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ReportRisk risk;
 
-    @Enumerated(EnumType.STRING)
-    private ReportStatus status;
-
     private Boolean hasConflict;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     @OneToOne
-    @JoinColumn(name = "report_id", unique = true)
+    @JoinColumn(name = "report_id", nullable = false)
     private ReportEntity report;
 }

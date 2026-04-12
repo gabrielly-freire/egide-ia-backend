@@ -76,4 +76,9 @@ public class UserInfoServiceImpl implements UserInfoService {
         userInfoRepository.deleteById(id);
     }
 
+    public UserInfoEntity findById(Long id) {
+        return userInfoRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+    }
+
 }

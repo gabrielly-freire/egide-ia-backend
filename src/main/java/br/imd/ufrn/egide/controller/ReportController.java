@@ -1,14 +1,17 @@
 package br.imd.ufrn.egide.controller;
 
 import br.imd.ufrn.egide.dto.ReportDTO;
-import br.imd.ufrn.egide.enums.ReportCategory;
+import br.imd.ufrn.egide.dto.ReportRequestDTO;
 import br.imd.ufrn.egide.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @AllArgsConstructor
@@ -19,10 +22,13 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Criar uma nova denúncia")
-    public ResponseEntity<ReportDTO> create(@Valid @RequestBody ReportDTO reportDTO) {
-        return ResponseEntity.ok(reportService.save(reportDTO));
+    public ResponseEntity<ReportDTO> create(
+            @Valid @RequestPart("report") ReportRequestDTO reportRequestDTO,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+
+        return ResponseEntity.ok(reportService.save(reportRequestDTO, files));
     }
 
     @GetMapping
@@ -37,9 +43,4 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getById(id));
     }
 
-    @Operation(summary = "Triagem de categoria da denúncia")
-    @PatchMapping("{id}/category")
-    public ResponseEntity<ReportDTO> updateCategory(@PathVariable Long id, @RequestBody ReportCategory category) {
-        return ResponseEntity.ok(reportService.updateCategory(id, category));
-    }
 }

@@ -8,7 +8,7 @@ services:
     ports:
       - '5434:5432'
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sgam_user -d sgam_db"]
       interval: 5s

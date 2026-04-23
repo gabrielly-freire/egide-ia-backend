@@ -11,6 +11,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
@@ -28,6 +29,7 @@ public class FileController {
             @ApiResponse(description = "Erro interno do servidor", responseCode = "500")
     })
     @GetMapping("/download/{id}")
+    @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
     public ResponseEntity<Resource> download(@PathVariable Long id) {
 
         Resource resource = fileService.findResourceById(id);
@@ -45,6 +47,7 @@ public class FileController {
             @ApiResponse(description = "Erro interno do servidor", responseCode = "500")
     })
     @GetMapping("/preview/{id}")
+    @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
     public ResponseEntity<Resource> preview(@PathVariable Long id) {
 
         FileEntity file = fileService.findById(id);

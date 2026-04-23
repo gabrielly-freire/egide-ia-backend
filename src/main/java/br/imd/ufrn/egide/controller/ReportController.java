@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +24,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('REMONSTRANT','ADMIN')")
     @Operation(summary = "Criar uma nova denúncia")
     public ResponseEntity<ReportDTO> create(
             @Valid @RequestPart("report") ReportRequestDTO reportRequestDTO,
@@ -32,12 +34,14 @@ public class ReportController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
     @Operation(summary = "Listar todas as denúncias")
     public ResponseEntity<List<ReportDTO>> listAll() {
         return ResponseEntity.ok(reportService.findAll());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
     @Operation(summary = "Buscar denúncia por ID")
     public ResponseEntity<ReportDTO> get(@PathVariable Long id) {
         return ResponseEntity.ok(reportService.getById(id));

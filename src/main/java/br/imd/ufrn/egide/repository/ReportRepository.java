@@ -9,6 +9,10 @@ import java.util.List;
 
 @Repository
 public interface ReportRepository extends GenericRepository<ReportEntity> {
+
     List<ReportEntity> findAllByStatusAndCreatedAtBefore(ReportStatus status, LocalDateTime dateTime);
+
     List<ReportEntity> findAllByStatusAndCreatedAtBetween(ReportStatus status, LocalDateTime start, LocalDateTime end);
+
+    long countByStatus(ReportStatus status);
 }

@@ -6,6 +6,7 @@ import br.imd.ufrn.egide.entity.ReportEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ReportService {
 
@@ -16,4 +17,6 @@ public interface ReportService {
     ReportDTO getById(Long id);
 
     ReportEntity findEntityById(Long id);
+
+    Map<String, Long> getDashboardStatus();
 }

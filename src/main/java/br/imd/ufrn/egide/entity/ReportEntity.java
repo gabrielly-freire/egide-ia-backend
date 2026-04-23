@@ -1,5 +1,6 @@
 package br.imd.ufrn.egide.entity;
 
+import br.imd.ufrn.egide.enums.ReportStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
@@ -27,6 +28,10 @@ public class ReportEntity extends BaseEntity {
     private String description;
 
     private LocalDate dateOfOccurrence;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReportStatus status;
 
     @ManyToOne
     @JoinColumn(name = "user_info_id")

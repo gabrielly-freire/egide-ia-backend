@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @RestController
@@ -51,6 +52,10 @@ public class ReportController {
     public ResponseEntity<ReportDTO> get(@PathVariable Long id) {
         return ResponseEntity.ok(reportService.getById(id));
     }
+
+    @GetMapping("/dashboard/status")
+    @Operation(summary = "Métricas para o painel de gestão")
+    public ResponseEntity<Map<String, Long>> getDashboardStatus() { return ResponseEntity.ok(reportService.getDashboardStatus());}
 
     @GetMapping("/{id}/sugerir-resposta")
     @PreAuthorize("hasAnyRole('LISTENER','MANAGER','ADMIN')")

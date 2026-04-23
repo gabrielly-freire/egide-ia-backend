@@ -14,7 +14,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,5 +72,15 @@ public class ReportServiceImpl implements ReportService {
     public ReportEntity findEntityById(Long id) {
         return reportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Denúncia não encontrada"));
+    }
+
+    @Override
+    public Map<String, Long> getDashboardStatus() {
+        Map<String, Long> status = new HashMap<>();
+        status.put("total", reportRepository.count());
+        status.put("pendentes", reportRepository.countByStatus(ReportStatus.PENDING));
+        status.put("analisados", reportRepository.countByStatus(ReportStatus.ANALYZED));
+        status.put("rejeitados", reportRepository.countByStatus(ReportStatus.REJECTED));
+        return status;
     }
 }

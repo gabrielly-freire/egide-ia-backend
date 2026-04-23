@@ -4,18 +4,13 @@ import br.imd.ufrn.egide.dto.ReportDTO;
 import br.imd.ufrn.egide.dto.ReportRequestDTO;
 import br.imd.ufrn.egide.entity.ReportEntity;
 import br.imd.ufrn.egide.entity.UserInfoEntity;
-import br.imd.ufrn.egide.enums.ReportStatus;
 import br.imd.ufrn.egide.event.ReportCreatedEvent;
 import br.imd.ufrn.egide.mapper.ReportMapper;
 import br.imd.ufrn.egide.repository.ReportRepository;
-import br.imd.ufrn.egide.utils.exception.BusinessException;
 import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,10 +32,6 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public ReportDTO save(ReportRequestDTO reportRequestDTO, List<MultipartFile> files) {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UserInfoEntity user)) {
-//            throw new BusinessException("Usuário inválido", HttpStatus.UNAUTHORIZED);
-//        }
 
         UserInfoEntity user = userInfoService.findById(1L);
 

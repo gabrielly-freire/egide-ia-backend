@@ -2,7 +2,11 @@ package br.imd.ufrn.egide.controller;
 
 import br.imd.ufrn.egide.dto.ReportDTO;
 import br.imd.ufrn.egide.dto.ReportRequestDTO;
+import br.imd.ufrn.egide.dto.ReportRespondRequestDTO;
+import br.imd.ufrn.egide.dto.ReportRespondResponseDTO;
+import br.imd.ufrn.egide.dto.ReportResponseSuggestionResponseDTO;
 import br.imd.ufrn.egide.service.ReportService;
+import br.imd.ufrn.egide.service.ReportResponseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,6 +26,7 @@ import java.util.List;
 public class ReportController {
 
     private final ReportService reportService;
+    private final ReportResponseService reportResponseService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('REMONSTRANT','ADMIN')")
@@ -45,6 +50,20 @@ public class ReportController {
     @Operation(summary = "Buscar denúncia por ID")
     public ResponseEntity<ReportDTO> get(@PathVariable Long id) {
         return ResponseEntity.ok(reportService.getById(id));
+    }
+
+    @GetMapping("/{id}/sugerir-resposta")
+    @PreAuthorize("hasAnyRole('LISTENER','MANAGER','ADMIN')")
+    @Operation(summary = "Sugerir resposta para uma denúncia (IA)")
+    public ResponseEntity<ReportResponseSuggestionResponseDTO> suggestResponse(@PathVariable Long id) {
+        return ResponseEntity.ok(reportResponseService.suggestResponse(id));
+    }
+
+    @PostMapping("/{id}/responder")
+    @PreAuthorize("hasAnyRole('LISTENER','MANAGER','ADMIN')")
+    @Operation(summary = "Responder uma denúncia considerando a sugestão da IA")
+    public ResponseEntity<ReportRespondResponseDTO> respond(@PathVariable Long id, @RequestBody(required = false) ReportRespondRequestDTO request) {
+        return ResponseEntity.ok(reportResponseService.respond(id, request));
     }
 
 }

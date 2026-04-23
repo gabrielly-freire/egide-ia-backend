@@ -4,8 +4,6 @@ import br.imd.ufrn.egide.dto.*;
 import br.imd.ufrn.egide.entity.FileEntity;
 import br.imd.ufrn.egide.entity.ReportAiAnalysedEntity;
 import br.imd.ufrn.egide.entity.ReportEntity;
-import br.imd.ufrn.egide.enums.ReportCategory;
-import br.imd.ufrn.egide.enums.ReportRisk;
 import br.imd.ufrn.egide.repository.ReportAiAnalysedRepository;
 import br.imd.ufrn.egide.utils.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +67,15 @@ public class ReportAiServiceImpl implements ReportAiService {
                 .body(request)
                 .retrieve()
                 .body(ReportAnalysedResponseDTO.class);
+    }
+
+    @Override
+    public ReportResponseSuggestionResponseDTO suggestResponse(ReportResponseSuggestionRequestDTO request) {
+        return restClient.post()
+                .uri("/compliance/sugerir-resposta")
+                .body(request)
+                .retrieve()
+                .body(ReportResponseSuggestionResponseDTO.class);
     }
 
     private List<ReportAiFileProcessing> toAiFiles(List<FileEntity> fileEntities) {

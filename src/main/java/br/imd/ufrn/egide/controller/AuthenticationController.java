@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +44,7 @@ public class AuthenticationController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Retornar dados do usuário autenticado")
     public ResponseEntity<AuthenticatedUserDTO> me(@AuthenticationPrincipal UserInfoEntity user) {
         AuthenticatedUserDTO response = new AuthenticatedUserDTO(

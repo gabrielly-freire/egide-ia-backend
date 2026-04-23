@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum ReportStatus {
     PENDING("Pendente"),
     ANALYZED("Analisado"),
-    REJECTED("Rejeitado");
+    REJECTED("Rejeitado"),
+    RESPONDED("Respondido");
 
     private String description;
 }

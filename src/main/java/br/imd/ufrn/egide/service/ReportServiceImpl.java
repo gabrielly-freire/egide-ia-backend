@@ -35,10 +35,6 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public ReportDTO save(ReportRequestDTO reportRequestDTO, List<MultipartFile> files) {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UserInfoEntity user)) {
-//            throw new BusinessException("Usuário inválido", HttpStatus.UNAUTHORIZED);
-//        }
 
         UserInfoEntity user = userInfoService.findById(1L);
 

@@ -72,6 +72,15 @@ public class ReportAiServiceImpl implements ReportAiService {
                 .body(ReportAnalysedResponseDTO.class);
     }
 
+    @Override
+    public ReportResponseSuggestionResponseDTO suggestResponse(ReportResponseSuggestionRequestDTO request) {
+        return restClient.post()
+                .uri("/compliance/sugerir-resposta")
+                .body(request)
+                .retrieve()
+                .body(ReportResponseSuggestionResponseDTO.class);
+    }
+
     private List<ReportAiFileProcessing> toAiFiles(List<FileEntity> fileEntities) {
 
         if (fileEntities == null || fileEntities.isEmpty()) {

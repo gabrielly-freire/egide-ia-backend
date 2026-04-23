@@ -20,7 +20,7 @@ public class AiConnectionConfig {
 
         return RestClient.builder()
                 .baseUrl(prop.baseUrl())
-                .defaultHeader("API-Key", prop.apiKey())
+                .defaultHeader("X-API-Key", prop.apiKey())
                 .requestFactory(factory)
                 .build();
     }

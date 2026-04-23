@@ -19,6 +19,9 @@ INSERT INTO department (id, name, acronym, active, created_at)
 SELECT 14, 'Jurídico', 'JUR', TRUE, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM department d WHERE d.id = 14);
 
+SELECT setval(pg_get_serial_sequence('department', 'id'), COALESCE((SELECT MAX(id) FROM department), 1));
+SELECT setval(pg_get_serial_sequence('user_info', 'id'), COALESCE((SELECT MAX(id) FROM public.user_info), 1));
+
 -- Users
 INSERT INTO public.user_info (active, created_at, updated_at, email, name, username, password, role, department_id)
 SELECT

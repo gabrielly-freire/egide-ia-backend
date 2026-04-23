@@ -4,6 +4,7 @@ import br.imd.ufrn.egide.dto.ReportDTO;
 import br.imd.ufrn.egide.dto.ReportRequestDTO;
 import br.imd.ufrn.egide.entity.ReportEntity;
 import br.imd.ufrn.egide.entity.UserInfoEntity;
+import br.imd.ufrn.egide.enums.ReportStatus;
 import br.imd.ufrn.egide.event.ReportCreatedEvent;
 import br.imd.ufrn.egide.mapper.ReportMapper;
 import br.imd.ufrn.egide.repository.ReportRepository;

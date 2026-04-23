@@ -4,8 +4,6 @@ import br.imd.ufrn.egide.dto.*;
 import br.imd.ufrn.egide.entity.FileEntity;
 import br.imd.ufrn.egide.entity.ReportAiAnalysedEntity;
 import br.imd.ufrn.egide.entity.ReportEntity;
-import br.imd.ufrn.egide.enums.ReportCategory;
-import br.imd.ufrn.egide.enums.ReportRisk;
 import br.imd.ufrn.egide.repository.ReportAiAnalysedRepository;
 import br.imd.ufrn.egide.utils.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +49,9 @@ public class ReportAiServiceImpl implements ReportAiService {
         entity.setDescriptionAnonymized(anonymizeResponse.anonymizedDescription());
         entity.setCategory(analysisResponse.category());
         entity.setRisk(analysisResponse.risk());
+        entity.setConflictDetected(analysisResponse.conflictDetected());
+        entity.setConflictedUserIds(analysisResponse.conflictedUserIds());
+        entity.setManagerConflict(analysisResponse.managerConflict());
         reportAiAnalysedRepository.save(entity);
     }
 

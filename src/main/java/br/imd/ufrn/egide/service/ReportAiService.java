@@ -4,7 +4,6 @@ import br.imd.ufrn.egide.dto.ReportAnalysedRequestDTO;
 import br.imd.ufrn.egide.dto.ReportAnalysedResponseDTO;
 import br.imd.ufrn.egide.dto.ReportAnonymizedRequestDTO;
 import br.imd.ufrn.egide.dto.ReportAnonymizedResponseDTO;
-import br.imd.ufrn.egide.entity.ReportEntity;
 
 public interface ReportAiService {
 

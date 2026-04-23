@@ -46,6 +46,8 @@ public class ReportController {
 
     @GetMapping("/dashboard/status")
     @Operation(summary = "Métricas para o painel de gestão")
-    public ResponseEntity<Map<String, Long>> getDashboardStatus() { return ResponseEntity.ok(reportService.getDashboardStatus());}
+    public ResponseEntity<Map<String, Long>> getDashboardStatus() {
+        return ResponseEntity.ok(reportService.getDashboardStatus());
+    }
 
 }

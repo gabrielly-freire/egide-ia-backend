@@ -8,14 +8,10 @@ import br.imd.ufrn.egide.enums.ReportStatus;
 import br.imd.ufrn.egide.event.ReportCreatedEvent;
 import br.imd.ufrn.egide.mapper.ReportMapper;
 import br.imd.ufrn.egide.repository.ReportRepository;
-import br.imd.ufrn.egide.utils.exception.BusinessException;
 import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,6 +47,7 @@ public class ReportServiceImpl implements ReportService {
         entity.setDescription(reportRequestDTO.description());
         entity.setDateOfOccurrence(reportRequestDTO.dateOfOccurrence());
         entity.setUserInfo(user);
+        entity.setStatus(ReportStatus.PENDING);
         entity = reportRepository.save(entity);
         entity.setProtocolNumber(PROTOCOL_NUMBER_PREFIX + entity.getId());
         entity = reportRepository.save(entity);

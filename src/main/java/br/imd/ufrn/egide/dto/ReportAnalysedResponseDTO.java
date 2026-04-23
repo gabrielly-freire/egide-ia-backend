@@ -4,8 +4,13 @@ import br.imd.ufrn.egide.enums.ReportCategory;
 import br.imd.ufrn.egide.enums.ReportRisk;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public record ReportAnalysedResponseDTO(
         @JsonProperty("report_id") Long reportId,
         ReportCategory category,
-        @JsonProperty("risk_level") ReportRisk risk
+        @JsonProperty("risk_level") ReportRisk risk,
+        @JsonProperty("conflict_detected") Boolean conflictDetected,
+        @JsonProperty("conflicted_user_ids") List<String> conflictedUserIds,
+        @JsonProperty("manager_conflict") Boolean managerConflict
 ) { }

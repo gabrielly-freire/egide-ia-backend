@@ -8,10 +8,12 @@ import br.imd.ufrn.egide.enums.ReportStatus;
 import br.imd.ufrn.egide.event.ReportCreatedEvent;
 import br.imd.ufrn.egide.mapper.ReportMapper;
 import br.imd.ufrn.egide.repository.ReportRepository;
+import br.imd.ufrn.egide.repository.UserInfoRepository;
 import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +31,7 @@ public class ReportServiceImpl implements ReportService {
     private final FileService fileService;
     private final ApplicationEventPublisher eventPublisher;
     private final UserInfoService userInfoService;
+    private final UserInfoRepository userInfoRepository;
 
     private static final String PROTOCOL_NUMBER_PREFIX = "PM";
 
@@ -58,6 +61,18 @@ public class ReportServiceImpl implements ReportService {
 
     public List<ReportDTO> findAll() {
         return reportRepository.findAll()
+                .stream()
+                .map(reportMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<ReportDTO> findMyReports() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        UserInfoEntity user = userInfoRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+
+        return reportRepository.findByUserInfoId(user.getId())
                 .stream()
                 .map(reportMapper::toDTO)
                 .collect(Collectors.toList());

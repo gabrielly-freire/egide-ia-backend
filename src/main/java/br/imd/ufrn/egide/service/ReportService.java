@@ -14,6 +14,8 @@ public interface ReportService {
 
     List<ReportDTO> findAll();
 
+    List<ReportDTO> findMyReports();
+
     ReportDTO getById(Long id);
 
     ReportEntity findEntityById(Long id);

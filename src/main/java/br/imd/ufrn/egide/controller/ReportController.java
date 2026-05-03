@@ -46,6 +46,11 @@ public class ReportController {
         return ResponseEntity.ok(reportService.findAll());
     }
 
+    @GetMapping("/my-reports")
+    public ResponseEntity<List<ReportDTO>> findMyReports() {
+        return ResponseEntity.ok(reportService.findMyReports());
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
     @Operation(summary = "Buscar denúncia por ID")

@@ -60,7 +60,9 @@ public class ReportController {
 
     @GetMapping("/dashboard/status")
     @Operation(summary = "Métricas para o painel de gestão")
-    public ResponseEntity<Map<String, Long>> getDashboardStatus() { return ResponseEntity.ok(reportService.getDashboardStatus());}
+    public ResponseEntity<Map<String, Long>> getDashboardStatus() {
+        return ResponseEntity.ok(reportService.getDashboardStatus());
+    }
 
     @GetMapping("/{id}/sugerir-resposta")
     @PreAuthorize("hasAnyRole('LISTENER','MANAGER','ADMIN')")
@@ -69,10 +71,20 @@ public class ReportController {
         return ResponseEntity.ok(reportResponseService.suggestResponse(id));
     }
 
+    @GetMapping("/{id}/resposta")
+    @PreAuthorize("hasAnyRole('LISTENER','MANAGER','ADMIN')")
+    @Operation(summary = "Buscar resposta registrada para uma denúncia")
+    public ResponseEntity<ReportRespondResponseDTO> getResponse(@PathVariable Long id) {
+        return ResponseEntity.ok(reportResponseService.getResponse(id));
+    }
+
     @PostMapping("/{id}/responder")
     @PreAuthorize("hasAnyRole('LISTENER','MANAGER','ADMIN')")
     @Operation(summary = "Responder uma denúncia considerando a sugestão da IA")
-    public ResponseEntity<ReportRespondResponseDTO> respond(@PathVariable Long id, @RequestBody(required = false) ReportRespondRequestDTO request) {
+    public ResponseEntity<ReportRespondResponseDTO> respond(
+            @PathVariable Long id,
+            @RequestBody(required = false) ReportRespondRequestDTO request
+    ) {
         return ResponseEntity.ok(reportResponseService.respond(id, request));
     }
 

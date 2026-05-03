@@ -5,6 +5,7 @@ CREATE TABLE report (
     updated_at TIMESTAMP WITHOUT TIME ZONE,
     title      VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
     CONSTRAINT pk_report PRIMARY KEY (id)
 );
 

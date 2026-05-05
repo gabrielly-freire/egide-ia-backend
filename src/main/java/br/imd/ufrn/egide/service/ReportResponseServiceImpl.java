@@ -13,6 +13,7 @@ import br.imd.ufrn.egide.repository.ReportAiAnalysedRepository;
 import br.imd.ufrn.egide.repository.ReportProcessedRepository;
 import br.imd.ufrn.egide.repository.ReportResponseRepository;
 import br.imd.ufrn.egide.utils.exception.BusinessException;
+import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -76,6 +77,7 @@ public class ReportResponseServiceImpl implements ReportResponseService {
         }
 
         ReportEntity report = reportService.findEntityById(reportId);
+        report.setStatus(ReportStatus.RESPONDED);
 
         ReportResponseEntity responseEntity = reportResponseRepository.findByReportId(reportId)
                 .orElseGet(ReportResponseEntity::new);
@@ -92,7 +94,7 @@ public class ReportResponseServiceImpl implements ReportResponseService {
             reportProcessedRepository.save(processed);
         }
 
-        String status = processed != null && processed.getStatus() != null ? processed.getStatus().name() : ReportStatus.RESPONDED.name();
+        String status = report.getStatus() != null ? report.getStatus().name() : ReportStatus.RESPONDED.name();
 
         return new ReportRespondResponseDTO(
                 reportId,
@@ -113,5 +115,23 @@ public class ReportResponseServiceImpl implements ReportResponseService {
             return "";
         }
         return value.replaceAll("\\s+", " ").trim();
+    }
+
+    @Override
+    public ReportRespondResponseDTO getResponse(Long reportId) {
+        ReportResponseEntity responseEntity = reportResponseRepository.findByReportId(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resposta não encontrada"));
+
+        ReportEntity report = reportService.findEntityById(reportId);
+        String status = report.getStatus() != null ? report.getStatus().name() : ReportStatus.RESPONDED.name();
+
+        return new ReportRespondResponseDTO(
+                reportId,
+                responseEntity.getResponseText(),
+                responseEntity.getAiSuggestion(),
+                responseEntity.getUsedAiSuggestion(),
+                status,
+                responseEntity.getRespondedAt()
+        );
     }
 }

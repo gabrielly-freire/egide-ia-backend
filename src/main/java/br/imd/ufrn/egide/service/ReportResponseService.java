@@ -9,4 +9,6 @@ public interface ReportResponseService {
     ReportResponseSuggestionResponseDTO suggestResponse(Long reportId);
 
     ReportRespondResponseDTO respond(Long reportId, ReportRespondRequestDTO request);
+
+    ReportRespondResponseDTO getResponse(Long reportId);
 }

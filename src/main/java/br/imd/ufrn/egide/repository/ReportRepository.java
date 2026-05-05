@@ -14,5 +14,7 @@ public interface ReportRepository extends GenericRepository<ReportEntity> {
 
     List<ReportEntity> findAllByStatusAndCreatedAtBetween(ReportStatus status, LocalDateTime start, LocalDateTime end);
 
+    List<ReportEntity> findByUserInfoId(Long userInfoId);
+
     long countByStatus(ReportStatus status);
 }

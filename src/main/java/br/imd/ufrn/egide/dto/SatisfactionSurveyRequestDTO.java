@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record SatisfactionSurveyRequestDTO(
         @NotNull Long reportId,
-        @Min(1) @Max(5) Integer speedRating,
-        @Min(1) @Max(5) Integer resolutionRating,
+        @Min(0) @Max(5) Integer speedRating,
+        @Min(0) @Max(5) Integer resolutionRating,
         String comments
 ) {}

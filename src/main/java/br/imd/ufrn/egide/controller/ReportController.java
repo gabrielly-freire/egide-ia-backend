@@ -57,7 +57,7 @@ public class ReportController {
     @GetMapping("/dashboard/status")
     @Operation(summary = "Métricas para o painel de gestão")
     @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
-    public ResponseEntity<Map<String, Long>> getDashboardStatus() {
+    public ResponseEntity<Map<String, Object>> getDashboardStatus() {
         return ResponseEntity.ok(reportService.getDashboardStatus());
     }
 

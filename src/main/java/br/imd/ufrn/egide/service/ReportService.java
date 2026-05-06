@@ -21,7 +21,7 @@ public interface ReportService {
 
     ReportEntity findEntityById(Long id);
 
-    Map<String, Long> getDashboardStatus();
+    Map<String, Object> getDashboardStatus();
 
     void saveSurvey(Long reportId, SatisfactionSurveyRequestDTO dto);
 }

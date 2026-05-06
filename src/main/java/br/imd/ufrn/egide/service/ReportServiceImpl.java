@@ -98,12 +98,19 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Map<String, Long> getDashboardStatus() {
-        Map<String, Long> status = new HashMap<>();
+    public Map<String, Object> getDashboardStatus() {
+        Map<String, Object> status = new HashMap<>();
         status.put("total", reportRepository.count());
         status.put("pendentes", reportRepository.countByStatus(ReportStatus.PENDING));
         status.put("analisados", reportRepository.countByStatus(ReportStatus.ANALYZED));
         status.put("rejeitados", reportRepository.countByStatus(ReportStatus.REJECTED));
+
+        Double avgSpeed = surveyRepository.getAverageSpeedRating();
+        Double avgResolution = surveyRepository.getAverageResolutionRating();
+
+        // Tratamento para evitar null caso não haja pesquisas ainda
+        status.put("mediaAgilidade", avgSpeed != null ? avgSpeed : 0.0);
+        status.put("mediaResolucao", avgResolution != null ? avgResolution : 0.0);
         return status;
     }
 

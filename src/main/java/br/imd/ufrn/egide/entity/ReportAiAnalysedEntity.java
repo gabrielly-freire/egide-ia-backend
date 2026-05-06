@@ -15,10 +15,6 @@ import java.util.List;
 @SQLRestriction(value = "active = true")
 public class ReportAiAnalysedEntity extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(columnDefinition = "TEXT")
     private String titleAnonymized;
 

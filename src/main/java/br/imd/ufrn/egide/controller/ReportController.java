@@ -1,10 +1,6 @@
 package br.imd.ufrn.egide.controller;
 
-import br.imd.ufrn.egide.dto.ReportDTO;
-import br.imd.ufrn.egide.dto.ReportRequestDTO;
-import br.imd.ufrn.egide.dto.ReportRespondRequestDTO;
-import br.imd.ufrn.egide.dto.ReportRespondResponseDTO;
-import br.imd.ufrn.egide.dto.ReportResponseSuggestionResponseDTO;
+import br.imd.ufrn.egide.dto.*;
 import br.imd.ufrn.egide.service.ReportService;
 import br.imd.ufrn.egide.service.ReportResponseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -87,6 +83,13 @@ public class ReportController {
             @RequestBody(required = false) ReportRespondRequestDTO request
     ) {
         return ResponseEntity.ok(reportResponseService.respond(id, request));
+    }
+
+    @PostMapping("/{id}/survey")
+    @Operation(summary = "Enviar pesquisa de satisfação para uma denúncia")
+    public ResponseEntity<Void> submitSurvey(@PathVariable Long id, @Valid @RequestBody SatisfactionSurveyRequestDTO surveyDTO) {
+        reportService.saveSurvey(id, surveyDTO);
+        return ResponseEntity.ok().build();
     }
 
 }

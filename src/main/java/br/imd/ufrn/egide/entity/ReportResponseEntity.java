@@ -18,10 +18,6 @@ import java.time.LocalDateTime;
 @SQLRestriction(value = "active = true")
 public class ReportResponseEntity extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     private String responseText;
 
     private String aiSuggestion;

@@ -2,17 +2,22 @@ package br.imd.ufrn.egide.service;
 
 import br.imd.ufrn.egide.dto.ReportDTO;
 import br.imd.ufrn.egide.dto.ReportRequestDTO;
+import br.imd.ufrn.egide.dto.SatisfactionSurveyRequestDTO;
 import br.imd.ufrn.egide.entity.ReportEntity;
+import br.imd.ufrn.egide.entity.SatisfactionSurveyEntity;
 import br.imd.ufrn.egide.entity.UserInfoEntity;
 import br.imd.ufrn.egide.enums.ReportStatus;
 import br.imd.ufrn.egide.event.ReportCreatedEvent;
 import br.imd.ufrn.egide.mapper.ReportMapper;
 import br.imd.ufrn.egide.repository.ReportRepository;
+import br.imd.ufrn.egide.repository.SatisfactionSurveyRepository;
 import br.imd.ufrn.egide.repository.UserInfoRepository;
+import br.imd.ufrn.egide.utils.exception.BusinessException;
 import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +37,7 @@ public class ReportServiceImpl implements ReportService {
     private final ApplicationEventPublisher eventPublisher;
     private final UserInfoService userInfoService;
     private final UserInfoRepository userInfoRepository;
+    private final SatisfactionSurveyRepository surveyRepository;
 
     private static final String PROTOCOL_NUMBER_PREFIX = "PM";
 
@@ -99,5 +105,24 @@ public class ReportServiceImpl implements ReportService {
         status.put("analisados", reportRepository.countByStatus(ReportStatus.ANALYZED));
         status.put("rejeitados", reportRepository.countByStatus(ReportStatus.REJECTED));
         return status;
+    }
+
+    @Override
+    @Transactional
+    public void saveSurvey(Long reportId, SatisfactionSurveyRequestDTO dto) {
+        ReportEntity report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Denúncia não encontrada"));
+
+        if (surveyRepository.existsByReportId(reportId)) {
+            throw new BusinessException("Pesquisa já realizada para esta manifestação.", HttpStatus.BAD_REQUEST);
+        }
+
+        SatisfactionSurveyEntity survey = new SatisfactionSurveyEntity();
+        survey.setReport(report);
+        survey.setSpeedRating(dto.speedRating());
+        survey.setResolutionRating(dto.resolutionRating());
+        survey.setComments(dto.comments());
+
+        surveyRepository.save(survey);
     }
 }

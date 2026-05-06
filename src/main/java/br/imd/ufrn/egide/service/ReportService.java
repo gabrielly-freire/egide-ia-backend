@@ -2,6 +2,7 @@ package br.imd.ufrn.egide.service;
 
 import br.imd.ufrn.egide.dto.ReportDTO;
 import br.imd.ufrn.egide.dto.ReportRequestDTO;
+import br.imd.ufrn.egide.dto.SatisfactionSurveyRequestDTO;
 import br.imd.ufrn.egide.entity.ReportEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,4 +22,6 @@ public interface ReportService {
     ReportEntity findEntityById(Long id);
 
     Map<String, Long> getDashboardStatus();
+
+    void saveSurvey(Long reportId, SatisfactionSurveyRequestDTO dto);
 }

@@ -10,7 +10,6 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction(value = "active = true")
 public class FileEntity extends BaseEntity {
 
-    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;

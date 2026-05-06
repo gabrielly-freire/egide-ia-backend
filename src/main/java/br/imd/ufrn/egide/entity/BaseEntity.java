@@ -1,21 +1,26 @@
 package br.imd.ufrn.egide.entity;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-
 import java.time.LocalDateTime;
 
 @MappedSuperclass
 public abstract class BaseEntity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected Long id;
+
     protected Boolean active = true;
     protected LocalDateTime createdAt;
     protected LocalDateTime updatedAt;
 
-    public abstract Long getId();
-
-    public abstract void setId(Long id);
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public Boolean getActive() {
         return active;

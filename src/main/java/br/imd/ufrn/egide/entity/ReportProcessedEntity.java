@@ -13,10 +13,6 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction(value = "active = true")
 public class ReportProcessedEntity extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(columnDefinition = "TEXT")
     private String titleAnonymized;
 

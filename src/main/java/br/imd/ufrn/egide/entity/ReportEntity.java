@@ -14,10 +14,6 @@ import java.util.List;
 @SQLRestriction(value = "active = true")
 public class ReportEntity extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @Column(unique = true)
     private String protocolNumber;
 

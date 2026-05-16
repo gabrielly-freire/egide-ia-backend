@@ -8,5 +8,6 @@ public record ReportAnalysedRequestDTO(
         @JsonProperty("report_id") Long reportId,
         String title,
         String description,
-        List<ReportAiFileProcessing> files
+        List<ReportAiFileProcessing> files,
+        @JsonProperty("responsible_users") List<ReportResponsibleUserDTO> responsibleUsers
 ) { }

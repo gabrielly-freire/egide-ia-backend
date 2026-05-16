@@ -21,10 +21,10 @@ public class ReportEntity extends BaseEntity {
     @Column(unique = true)
     private String protocolNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     private LocalDate dateOfOccurrence;

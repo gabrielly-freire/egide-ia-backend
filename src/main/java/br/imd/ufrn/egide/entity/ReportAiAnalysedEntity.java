@@ -7,6 +7,7 @@ import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -18,8 +19,10 @@ public class ReportAiAnalysedEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String titleAnonymized;
 
+    @Column(columnDefinition = "TEXT")
     private String descriptionAnonymized;
 
     @Enumerated(EnumType.STRING)
@@ -28,7 +31,19 @@ public class ReportAiAnalysedEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ReportRisk risk;
 
-    private Boolean hasConflict;
+    @Column(name = "conflict_detected")
+    private Boolean conflictDetected;
+
+    @Column(name = "manager_conflict")
+    private Boolean managerConflict;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "report_ai_analysed_conflicted_user_ids",
+            joinColumns = @JoinColumn(name = "report_ai_analysed_id")
+    )
+    @Column(name = "conflicted_user_id")
+    private List<String> conflictedUserIds;
 
     private LocalDateTime createdAt;
 

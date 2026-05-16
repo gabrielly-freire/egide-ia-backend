@@ -60,7 +60,7 @@ public class FileServiceImpl implements FileService {
             throw new BusinessException("Arquivo vazio", HttpStatus.BAD_REQUEST);
         }
 
-        if (file.getSize() > 10_000_000) {
+        if (file.getSize() > 20_000_000) {
             throw new BusinessException("Arquivo muito grande", HttpStatus.BAD_REQUEST);
         }
 

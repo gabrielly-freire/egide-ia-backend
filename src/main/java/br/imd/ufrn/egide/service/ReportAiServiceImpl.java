@@ -1,22 +1,32 @@
 package br.imd.ufrn.egide.service;
 
-import br.imd.ufrn.egide.dto.*;
-import br.imd.ufrn.egide.entity.FileEntity;
-import br.imd.ufrn.egide.entity.ReportAiAnalysedEntity;
-import br.imd.ufrn.egide.entity.ReportEntity;
-import br.imd.ufrn.egide.repository.ReportAiAnalysedRepository;
-import br.imd.ufrn.egide.utils.exception.BusinessException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
+
+import br.imd.ufrn.egide.dto.ReportAiFileProcessing;
+import br.imd.ufrn.egide.dto.ReportAnalysedRequestDTO;
+import br.imd.ufrn.egide.dto.ReportAnalysedResponseDTO;
+import br.imd.ufrn.egide.dto.ReportAnonymizedRequestDTO;
+import br.imd.ufrn.egide.dto.ReportAnonymizedResponseDTO;
+import br.imd.ufrn.egide.dto.ReportResponseSuggestionRequestDTO;
+import br.imd.ufrn.egide.dto.ReportResponseSuggestionResponseDTO;
+import br.imd.ufrn.egide.dto.ReportResponsibleUserDTO;
+import br.imd.ufrn.egide.entity.FileEntity;
+import br.imd.ufrn.egide.entity.ReportAiAnalysedEntity;
+import br.imd.ufrn.egide.entity.ReportEntity;
+import br.imd.ufrn.egide.enums.Role;
+import br.imd.ufrn.egide.repository.ReportAiAnalysedRepository;
+import br.imd.ufrn.egide.repository.UserInfoRepository;
+import br.imd.ufrn.egide.utils.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +35,7 @@ public class ReportAiServiceImpl implements ReportAiService {
     private final RestClient restClient;
     private final ReportService reportService;
     private final ReportAiAnalysedRepository reportAiAnalysedRepository;
+    private final UserInfoRepository userInfoRepository;
 
 
     @Override
@@ -38,8 +49,20 @@ public class ReportAiServiceImpl implements ReportAiService {
 
         List<ReportAiFileProcessing> files = toAiFiles(report.getFiles());
 
+        List<ReportResponsibleUserDTO> responsibleUsers = userInfoRepository
+                .findAllByRoleIn(List.of(Role.MANAGER, Role.LISTENER))
+                .stream()
+                .map(u -> new ReportResponsibleUserDTO(
+                        String.valueOf(u.getId()),
+                        u.getName(),
+                        u.getEmail(),
+                        u.getUsername(),
+                        u.getRole().name()
+                ))
+                .toList();
+
         ReportAnalysedResponseDTO analysisResponse = classify(
-                new ReportAnalysedRequestDTO(report.getId(), report.getTitle(), report.getDescription(), files)
+                new ReportAnalysedRequestDTO(report.getId(), report.getTitle(), report.getDescription(), files, responsibleUsers)
         );
 
         ReportAiAnalysedEntity entity = reportAiAnalysedRepository.findByReportId(report.getId())
@@ -49,6 +72,9 @@ public class ReportAiServiceImpl implements ReportAiService {
         entity.setDescriptionAnonymized(anonymizeResponse.anonymizedDescription());
         entity.setCategory(analysisResponse.category());
         entity.setRisk(analysisResponse.risk());
+        entity.setConflictDetected(analysisResponse.conflictDetected());
+        entity.setConflictedUserIds(analysisResponse.conflictedUserIds());
+        entity.setManagerConflict(analysisResponse.managerConflict());
         reportAiAnalysedRepository.save(entity);
     }
 

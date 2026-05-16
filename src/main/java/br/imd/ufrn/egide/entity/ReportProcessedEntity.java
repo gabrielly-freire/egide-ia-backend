@@ -3,15 +3,7 @@ package br.imd.ufrn.egide.entity;
 import br.imd.ufrn.egide.enums.ReportCategory;
 import br.imd.ufrn.egide.enums.ReportRisk;
 import br.imd.ufrn.egide.enums.ReportStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -25,8 +17,10 @@ public class ReportProcessedEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String titleAnonymized;
 
+    @Column(columnDefinition = "TEXT")
     private String descriptionAnonymized;
 
     @Enumerated(EnumType.STRING)

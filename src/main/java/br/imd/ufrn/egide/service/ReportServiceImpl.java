@@ -46,6 +46,7 @@ public class ReportServiceImpl implements ReportService {
         entity.setDescription(reportRequestDTO.description());
         entity.setDateOfOccurrence(reportRequestDTO.dateOfOccurrence());
         entity.setUserInfo(user);
+        entity.setStatus(ReportStatus.PENDING);
         entity = reportRepository.save(entity);
         entity.setProtocolNumber(PROTOCOL_NUMBER_PREFIX + entity.getId());
         entity = reportRepository.save(entity);

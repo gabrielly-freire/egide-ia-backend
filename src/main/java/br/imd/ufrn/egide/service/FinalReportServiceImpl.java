@@ -2,13 +2,17 @@ package br.imd.ufrn.egide.service;
 
 import br.imd.ufrn.egide.dto.FinalReportRequestDTO;
 import br.imd.ufrn.egide.dto.FinalReportResponseDTO;
+import br.imd.ufrn.egide.entity.DefenseEntity;
 import br.imd.ufrn.egide.entity.FinalReportEntity;
 import br.imd.ufrn.egide.entity.ReportEntity;
+import br.imd.ufrn.egide.entity.ReportProcessedEntity;
 import br.imd.ufrn.egide.entity.UserInfoEntity;
 import br.imd.ufrn.egide.enums.FinalReportDecision;
 import br.imd.ufrn.egide.enums.ReportStatus;
 import br.imd.ufrn.egide.enums.Role;
+import br.imd.ufrn.egide.repository.DefenseRepository;
 import br.imd.ufrn.egide.repository.FinalReportRepository;
+import br.imd.ufrn.egide.repository.ReportProcessedRepository;
 import br.imd.ufrn.egide.repository.UserInfoRepository;
 import br.imd.ufrn.egide.utils.exception.BusinessException;
 import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
@@ -19,16 +23,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 // Fase 3 conclusão — gerencia emissão e consulta do relatório final pelo Ouvidor, após análise da defesa.
 @Service
 @RequiredArgsConstructor
 public class FinalReportServiceImpl implements FinalReportService {
 
+    private final DefenseRepository defenseRepository;
     private final FinalReportRepository finalReportRepository;
     private final ReportService reportService;
     private final UserInfoRepository userInfoRepository;
+    private final ReportProcessedRepository reportProcessedRepository;
 
     // Valida e persiste o relatório final; avança o status para FINAL_ISSUED (fila de validação da OG).
     @Override
@@ -43,11 +48,20 @@ public class FinalReportServiceImpl implements FinalReportService {
         UserInfoEntity ouvidor = requireOuvidor();
         ensureAssignedOuvidor(report, ouvidor);
 
-        FinalReportEntity entity = finalReportRepository.findByReportId(reportId)
-                .orElseGet(FinalReportEntity::new);
+        DefenseEntity defense = defenseRepository.findByReportId(reportId)
+                .orElseThrow(() -> new BusinessException("Defesa ainda não enviada para este caso.", HttpStatus.BAD_REQUEST));
+        if (defense.getSubmittedAt() == null) {
+            throw new BusinessException("Defesa ainda não enviada para este caso.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (finalReportRepository.findByReportId(reportId).isPresent()) {
+            throw new BusinessException("Relatório final já emitido para este caso.", HttpStatus.CONFLICT);
+        }
+
+        FinalReportEntity entity = new FinalReportEntity();
         entity.setReport(report);
         entity.setOuvidor(ouvidor);
-        entity.setDefenseId(request.defenseId());
+        entity.setDefenseId(request.defenseId() != null ? request.defenseId() : defense.getId());
         entity.setDecision(request.decision());
         entity.setJustification(trim(request.justification()));
 
@@ -62,8 +76,13 @@ public class FinalReportServiceImpl implements FinalReportService {
         entity.setSubmittedAt(LocalDateTime.now());
         entity = finalReportRepository.save(entity);
 
-        // Avança o caso para aguardar validação do Ouvidor Geral.
         report.setStatus(ReportStatus.FINAL_ISSUED);
+
+        ReportProcessedEntity processed = reportProcessedRepository.findByReportId(reportId).orElse(null);
+        if (processed != null) {
+            processed.setStatus(ReportStatus.FINAL_ISSUED);
+            reportProcessedRepository.save(processed);
+        }
 
         return toDTO(entity, report);
     }
@@ -117,7 +136,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         if (ouvidor.getRole() == Role.ADMIN) {
             return;
         }
-        if (report.getOuvidor() == null || !Objects.equals(report.getOuvidor().getId(), ouvidor.getId())) {
+        if (report.getOuvidor() == null || !report.getOuvidor().getId().equals(ouvidor.getId())) {
             throw new BusinessException(
                     "Você não é o Ouvidor designado para este caso.",
                     HttpStatus.FORBIDDEN

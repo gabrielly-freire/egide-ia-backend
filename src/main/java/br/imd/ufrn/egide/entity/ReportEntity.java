@@ -6,6 +6,7 @@ import lombok.Data;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 // Entidade central da manifestação no sistema de Ouvidoria.
@@ -46,10 +47,13 @@ public class ReportEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "denunciado_user_id")
-    private UserInfoEntity denunciadoUser;
+    private UserInfoEntity denouncedUser;
 
     @Column(name = "repass_count", nullable = false)
     private Integer repassCount = 0;
+
+    @Column(name = "phase3_notified_at")
+    private LocalDateTime phase3NotifiedAt;
 
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
     private List<FileEntity> files;
@@ -61,10 +65,13 @@ public class ReportEntity extends BaseEntity {
     private ReportAiAnalysedEntity reportAiAnalysed;
 
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
-    private PreliminaryReportEntity preliminaryReport;
+    private DefenseEntity defense;
 
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
     private FinalReportEntity finalReport;
+
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    private PreliminaryReportEntity preliminaryReport;
 
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
     private AppealReportEntity appealReport;

@@ -1,6 +1,7 @@
 package br.imd.ufrn.egide.service;
 
 import br.imd.ufrn.egide.entity.FileEntity;
+import br.imd.ufrn.egide.entity.DefenseEntity;
 import br.imd.ufrn.egide.entity.ReportEntity;
 import br.imd.ufrn.egide.repository.FileRepository;
 import br.imd.ufrn.egide.utils.exception.BusinessException;
@@ -50,6 +51,33 @@ public class FileServiceImpl implements FileService {
                 entity.setContentType(file.getContentType());
                 entity.setSize(file.getSize());
                 entity.setReport(report);
+
+                fileRepository.save(entity);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Erro ao salvar arquivo");
+            }
+        }
+    }
+
+    @Override
+    public void uploadForDefense(List<MultipartFile> files, DefenseEntity defense) {
+        for (MultipartFile file : files) {
+            validateFile(file);
+
+            try {
+                String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+                Path path = Paths.get(UPLOAD_DIR + fileName);
+                Files.createDirectories(path.getParent());
+                Files.write(path, file.getBytes());
+
+                FileEntity entity = new FileEntity();
+                entity.setName(fileName);
+                entity.setPath(path.toString());
+                entity.setContentType(file.getContentType());
+                entity.setSize(file.getSize());
+                entity.setDefense(defense);
 
                 fileRepository.save(entity);
 

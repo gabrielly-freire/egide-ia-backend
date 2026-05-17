@@ -8,6 +8,9 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 @EnableConfigurationProperties(AiConnectionProperties.class)
+// Configuração do cliente HTTP (RestClient) utilizado para comunicação com o serviço de IA externo.
+// Aplica timeouts de conexão e leitura definidos em AiConnectionProperties para evitar bloqueios no pool de IA.
+// A chave de API é injetada como header padrão em todas as requisições ao microsserviço.
 public class AiConnectionConfig {
 
     @Bean

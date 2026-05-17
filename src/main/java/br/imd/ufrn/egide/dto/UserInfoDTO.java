@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+// DTO de entrada/saída para gerenciamento de usuários do sistema.
+// O campo password é exigido na criação/atualização, mas não deve ser retornado em leituras
+// (o mapper deve excluí-lo; caso contrário, o hash BCrypt será exposto).
 public record UserInfoDTO(
         Long id,
         

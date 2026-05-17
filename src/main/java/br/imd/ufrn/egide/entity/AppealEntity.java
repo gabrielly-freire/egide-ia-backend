@@ -9,6 +9,13 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
 
 
+// Recurso submetido por uma das partes após a validação da OG (Fase 5).
+// A restrição UNIQUE (report_id, appellant_role) é enforçada em nível de aplicação no AppealServiceImpl
+// para garantir que cada parte (DENUNCIANTE / DENUNCIADO) abra no máximo 1 recurso por caso.
+// Regra de merge: quando ambas as partes recorrem, o mesmo novo ouvidor analisa tudo —
+// o campo newOuvidor é compartilhado: se um recurso já existe para o caso, o novo recurso
+// herda o mesmo ouvidor sorteado no primeiro, e o AppealServiceImpl propaga o vínculo.
+// Anti-viés: o novo ouvidor não tem acesso às conclusões anteriores (parecer, defesa, relatório final).
 @Data
 @Entity
 @Table(name = "appeal")

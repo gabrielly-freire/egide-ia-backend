@@ -30,6 +30,9 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+// Implementação de ReportAiService; coordena chamadas ao microsserviço de IA via RestClient.
+// Todas as operações de IO com o serviço externo são síncronas neste service; a execução assíncrona
+// é responsabilidade do ReportCreatedListener (pool aiExecutor).
 public class ReportAiServiceImpl implements ReportAiService {
 
     private final RestClient restClient;
@@ -37,7 +40,8 @@ public class ReportAiServiceImpl implements ReportAiService {
     private final ReportAiAnalysedRepository reportAiAnalysedRepository;
     private final UserInfoRepository userInfoRepository;
 
-
+    // Orquestra o pipeline completo: busca a manifestação, anonimiza, converte arquivos para base64,
+    // classifica via IA e persiste o resultado em ReportAiAnalysedEntity (upsert por reportId).
     @Override
     @Transactional
     public void processReport(Long reportId) {
@@ -78,6 +82,7 @@ public class ReportAiServiceImpl implements ReportAiService {
         reportAiAnalysedRepository.save(entity);
     }
 
+    // Chama o endpoint /compliance/anonimizar do microsserviço de IA e retorna a resposta deserializada.
     @Override
     public ReportAnonymizedResponseDTO anonymize(ReportAnonymizedRequestDTO request) {
         return restClient.post()
@@ -86,6 +91,7 @@ public class ReportAiServiceImpl implements ReportAiService {
                 .retrieve()
                 .body(ReportAnonymizedResponseDTO.class);
     }
+    // Chama o endpoint /analysis/analisar do microsserviço de IA e retorna a classificação com detecção de conflito.
     @Override
     public ReportAnalysedResponseDTO classify(ReportAnalysedRequestDTO request) {
         return restClient.post()
@@ -95,6 +101,7 @@ public class ReportAiServiceImpl implements ReportAiService {
                 .body(ReportAnalysedResponseDTO.class);
     }
 
+    // Chama o endpoint /compliance/sugerir-resposta do microsserviço de IA e retorna a sugestão textual.
     @Override
     public ReportResponseSuggestionResponseDTO suggestResponse(ReportResponseSuggestionRequestDTO request) {
         return restClient.post()
@@ -104,6 +111,7 @@ public class ReportAiServiceImpl implements ReportAiService {
                 .body(ReportResponseSuggestionResponseDTO.class);
     }
 
+    // Converte a lista de entidades de arquivo para DTOs com conteúdo base64; retorna lista vazia se nula ou vazia.
     private List<ReportAiFileProcessing> toAiFiles(List<FileEntity> fileEntities) {
 
         if (fileEntities == null || fileEntities.isEmpty()) {
@@ -115,6 +123,8 @@ public class ReportAiServiceImpl implements ReportAiService {
                 .toList();
     }
 
+    // Lê o conteúdo binário do arquivo do disco e codifica em base64 para envio ao serviço de IA.
+    // Lança BusinessException com 500 se o arquivo não puder ser lido.
     private ReportAiFileProcessing toAiFile(FileEntity file) {
 
         try {

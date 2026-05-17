@@ -21,6 +21,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/v1/files")
 @Tag(name = "Arquivo", description = "Gerenciamento de arquivos")
+// Controller de gerenciamento de arquivos de evidência vinculados às manifestações.
+// Expõe endpoints de download, pré-visualização e listagem por manifestação.
 public class FileController {
 
     private final FileService fileService;

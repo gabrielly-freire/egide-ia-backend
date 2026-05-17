@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+// Repositório de usuários; herda soft-delete de GenericRepository.
+// Fornece consultas para autenticação, validação de unicidade e busca por papel.
 @Repository
 public interface UserInfoRepository extends GenericRepository<UserInfoEntity> {
 

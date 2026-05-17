@@ -8,6 +8,13 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDate;
 import java.util.List;
 
+// Entidade central da manifestação no sistema de Ouvidoria.
+// Agrega todos os vínculos do ciclo de vida: ouvidor designado (sorteado da pool), denunciado,
+// parecer preliminar (Fase 2), relatório final (Fase 3), recursos (Fase 5) e relatório de recurso.
+// O campo repassCount controla a regra de não-loop da OG: a OG só pode repassar um caso 1 vez;
+// tentativas subsequentes são bloqueadas no GeneralValidationServiceImpl.
+// O filtro @SQLRestriction garante que registros com active = false (soft-delete) sejam invisíveis
+// automaticamente para todas as queries JPA, sem necessidade de cláusula manual.
 @Data
 @Entity
 @Table(name = "report")

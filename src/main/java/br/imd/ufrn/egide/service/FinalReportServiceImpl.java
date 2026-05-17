@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+// Fase 3 conclusão — gerencia emissão e consulta do relatório final pelo Ouvidor, após análise da defesa.
 @Service
 @RequiredArgsConstructor
 public class FinalReportServiceImpl implements FinalReportService {
@@ -29,6 +30,7 @@ public class FinalReportServiceImpl implements FinalReportService {
     private final ReportService reportService;
     private final UserInfoRepository userInfoRepository;
 
+    // Valida e persiste o relatório final; avança o status para FINAL_ISSUED (fila de validação da OG).
     @Override
     @Transactional
     public FinalReportResponseDTO submit(Long reportId, FinalReportRequestDTO request) {
@@ -66,6 +68,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         return toDTO(entity, report);
     }
 
+    // Recupera o relatório final ou lança 404.
     @Override
     public FinalReportResponseDTO getByReportId(Long reportId) {
         FinalReportEntity entity = finalReportRepository.findByReportId(reportId)
@@ -73,6 +76,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         return toDTO(entity, entity.getReport());
     }
 
+    // ACATAR exige penalidade; NEGAR exige justificativa.
     private void validate(FinalReportRequestDTO request) {
         switch (request.decision()) {
             case ACATAR -> {
@@ -94,6 +98,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         }
     }
 
+    // Retorna o usuário autenticado garantindo que é LISTENER ou ADMIN.
     private UserInfoEntity requireOuvidor() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserInfoEntity user = userInfoRepository.findByUsername(username)
@@ -107,6 +112,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         return user;
     }
 
+    // Impede que um ouvidor diferente do designado submeta o relatório final.
     private void ensureAssignedOuvidor(ReportEntity report, UserInfoEntity ouvidor) {
         if (ouvidor.getRole() == Role.ADMIN) {
             return;
@@ -119,6 +125,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         }
     }
 
+    // Retorna null para strings vazias, evitando persistir valores sem conteúdo.
     private static String trim(String value) {
         if (value == null) {
             return null;
@@ -127,6 +134,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
+    // Converte entidade + report para o DTO de resposta ao cliente.
     private FinalReportResponseDTO toDTO(FinalReportEntity entity, ReportEntity report) {
         return new FinalReportResponseDTO(
                 entity.getId(),

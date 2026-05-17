@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/v1/user-info")
 @Tag(name = "Usuário", description = "Gerenciamento de usuários")
+// Controller de gerenciamento de usuários do sistema; operações de escrita restritas a ADMIN.
+// Leitura (listagem e consulta) permitida a MANAGER e ADMIN.
 public class UserInfoController {
 
     private final UserInfoService userInfoService;

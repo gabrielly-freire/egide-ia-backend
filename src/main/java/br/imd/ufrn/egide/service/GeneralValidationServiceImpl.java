@@ -28,15 +28,29 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+// Implementação da Fase 4: validação dos relatórios pelo Ouvidor Geral.
+// Responsabilidades:
+//   - Listar casos pendentes de decisão da OG (FINAL_ISSUED ou APPEAL_AWAITING_GENERAL).
+//   - Executar as três ações possíveis: VALIDATE (confirma), ALTER (substitui decisão), REPASS (novo ouvidor).
+//   - Garantir a regra de não-loop: máximo de 1 repass por caso (controlado por repassCount no ReportEntity).
+//   - Garantir anti-viés no repass: o novo ouvidor sorteado não pode ter participado do caso anteriormente.
+//   - Avançar o status da manifestação conforme a ação executada.
+// Fluxo de status pós-ação da OG:
+//   - VALIDATE / ALTER sobre FinalReport → GENERAL_VALIDATED
+//   - VALIDATE / ALTER sobre AppealReport → CLOSED
+//   - REPASS (apenas sobre FinalReport) → REPASSED
 @Service
 @RequiredArgsConstructor
+// Fase 4 — Ouvidor Geral valida, altera ou repassa relatórios finais e de recurso com regra de não-loop.
 public class GeneralValidationServiceImpl implements GeneralValidationService {
 
+    // Estados que indicam que um caso está aguardando decisão da OG.
     private static final List<ReportStatus> PENDING_STATUSES = List.of(
             ReportStatus.FINAL_ISSUED,
             ReportStatus.APPEAL_AWAITING_GENERAL
     );
 
+    // Limite de repasses por caso; alterar este valor requer ajuste nos testes e na documentação da API.
     private static final int MAX_REPASSES = 1;
 
     private final ReportService reportService;
@@ -46,17 +60,20 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
     private final UserInfoRepository userInfoRepository;
     private final OuvidorAssignmentService ouvidorAssignmentService;
 
+    // Lista casos aguardando decisão da OG (FINAL_ISSUED ou APPEAL_AWAITING_GENERAL), do mais antigo ao mais recente.
     @Override
     public List<OuvidorGeralCaseDTO> findPendingCases() {
         requireOuvidorGeral();
         return reportService.findEntitiesByStatusIn(PENDING_STATUSES)
                 .stream()
                 .map(this::toCaseDTO)
+                // Ordena cronologicamente para priorizar casos mais antigos na fila da OG.
                 .sorted(Comparator.comparing(c -> c.pendingSubmittedAt(),
                         Comparator.nullsLast(Comparator.naturalOrder())))
                 .toList();
     }
 
+    // Confirma o relatório sem alteração; avança para GENERAL_VALIDATED (ou CLOSED se for pós-recurso).
     @Override
     @Transactional
     public GeneralValidationResponseDTO validate(Long reportId) {
@@ -68,11 +85,13 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         entity = generalValidationRepository.save(entity);
 
         report.setStatus(ReportStatus.GENERAL_VALIDATED);
+        // Se o alvo for um AppealReport, o caso encerra definitivamente com CLOSED.
         closeAppealsIfNeeded(report, target);
 
         return toDTO(entity, report);
     }
 
+    // Registra nova decisão da OG preservando o relatório original no histórico; avança para GENERAL_VALIDATED.
     @Override
     @Transactional
     public GeneralValidationResponseDTO alter(Long reportId, GeneralValidationAlterRequestDTO request) {
@@ -92,11 +111,13 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         entity = generalValidationRepository.save(entity);
 
         report.setStatus(ReportStatus.GENERAL_VALIDATED);
+        // Se o alvo for um AppealReport, o caso encerra definitivamente com CLOSED.
         closeAppealsIfNeeded(report, target);
 
         return toDTO(entity, report);
     }
 
+    // Sorteia novo ouvidor (excluindo os que já tocaram o caso) e descarta o relatório atual; máximo 1 repass por caso.
     @Override
     @Transactional
     public GeneralValidationResponseDTO repass(Long reportId) {
@@ -104,6 +125,7 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         ReportEntity report = reportService.findEntityById(reportId);
         Target target = resolveTarget(report);
 
+        // Verifica regra de não-loop antes de qualquer outra operação.
         int currentRepasses = report.getRepassCount() != null ? report.getRepassCount() : 0;
         if (currentRepasses >= MAX_REPASSES) {
             throw new BusinessException(
@@ -112,6 +134,7 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
             );
         }
 
+        // Coleta todos os ouvidores que já participaram do caso para garantir anti-viés.
         List<Long> excluded = collectOuvidorIdsAlreadyOnCase(report);
         UserInfoEntity newOuvidor = ouvidorAssignmentService.assignOuvidor(excluded);
 
@@ -120,6 +143,7 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
 
         report.setStatus(ReportStatus.REPASSED);
 
+        // Descarta o FinalReport atual para que o novo ouvidor comece a análise do zero.
         if (target.finalReport != null) {
             finalReportRepository.delete(target.finalReport);
         }
@@ -131,13 +155,16 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         return toDTO(entity, report);
     }
 
+    // Ao validar/alterar um AppealReport (Fase 5), encerra o caso com status CLOSED.
     private void closeAppealsIfNeeded(ReportEntity report, Target target) {
+        // Somente o AppealReport aciona o encerramento definitivo; o FinalReport apenas gera GENERAL_VALIDATED.
         if (target.appealReport == null) {
             return;
         }
         report.setStatus(ReportStatus.CLOSED);
     }
 
+    // Reúne IDs de todos os ouvidores que participaram do caso para garantir anti-viés no repass.
     private List<Long> collectOuvidorIdsAlreadyOnCase(ReportEntity report) {
         List<Long> ids = new ArrayList<>();
         if (report.getOuvidor() != null) {
@@ -152,6 +179,7 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         return ids;
     }
 
+    // Retorna o usuário autenticado garantindo que é GENERAL_LISTENER ou ADMIN.
     private UserInfoEntity requireOuvidorGeral() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserInfoEntity user = userInfoRepository.findByUsername(username)
@@ -165,6 +193,8 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         return user;
     }
 
+    // Determina se a OG está avaliando FinalReport (FINAL_ISSUED) ou AppealReport (APPEAL_AWAITING_GENERAL).
+    // Lança exceção se o caso não estiver em nenhum dos dois estados esperados.
     private Target resolveTarget(ReportEntity report) {
         ReportStatus s = report.getStatus();
         if (s == ReportStatus.FINAL_ISSUED) {
@@ -189,6 +219,7 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         );
     }
 
+    // Instancia e preenche a entidade de validação com os dados comuns a todos os tipos de ação.
     private GeneralValidationEntity newEntity(ReportEntity report,
                                               Target target,
                                               UserInfoEntity geral,
@@ -203,9 +234,11 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         return entity;
     }
 
+    // Converte ReportEntity para o DTO resumido do painel da OG, calculando canRepass e decisão pendente.
     private OuvidorGeralCaseDTO toCaseDTO(ReportEntity report) {
         boolean isAppeal = report.getStatus() == ReportStatus.APPEAL_AWAITING_GENERAL;
         int repassCount = report.getRepassCount() != null ? report.getRepassCount() : 0;
+        // Repass apenas é permitido em FinalReport e enquanto o limite não foi atingido.
         boolean canRepass = !isAppeal && repassCount < MAX_REPASSES;
 
         FinalReportEntity fr = report.getFinalReport();
@@ -224,6 +257,7 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         );
     }
 
+    // Converte GeneralValidationEntity + report para o DTO de resposta completo.
     private GeneralValidationResponseDTO toDTO(GeneralValidationEntity entity, ReportEntity report) {
         return new GeneralValidationResponseDTO(
                 entity.getId(),
@@ -245,6 +279,7 @@ public class GeneralValidationServiceImpl implements GeneralValidationService {
         );
     }
 
+    // Retorna null para strings vazias, evitando persistir valores sem conteúdo.
     private static String trim(String value) {
         if (value == null) {
             return null;

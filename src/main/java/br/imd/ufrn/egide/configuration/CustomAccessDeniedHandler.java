@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Component
+// Handler de acesso negado (HTTP 403) para usuários autenticados sem permissão no recurso.
+// Retorna JSON padronizado no mesmo formato do ErrorMessage para consistência das respostas de erro.
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override

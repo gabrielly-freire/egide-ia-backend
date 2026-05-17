@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+// DTO de requisição para o endpoint de classificação do serviço de IA.
+// Inclui os arquivos de evidência codificados em base64 e a lista de usuários responsáveis
+// para detecção de conflito de interesse.
 public record ReportAnalysedRequestDTO(
         @JsonProperty("report_id") Long reportId,
         String title,

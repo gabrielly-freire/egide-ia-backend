@@ -33,8 +33,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+// Implementação da Fase 5: recursos submetidos pelas partes após validação da OG.
+// Responsabilidades:
+//   - Receber recursos de denunciante ou denunciado (1 por parte por caso).
+//   - Designar novo ouvidor via sorteio com anti-viés; aplicar regra de merge quando ambas as partes recorrem.
+//   - Listar recursos de uma manifestação e casos atribuídos ao novo ouvidor.
+//   - Permitir que o novo ouvidor emita o AppealReport consolidado.
+// Regra de merge: quando já existe um recurso para o caso, o novo recurso herda o mesmo ouvidor
+// do primeiro, garantindo que um único ouvidor analise todos os recursos de um mesmo caso.
+// Anti-viés: o OuvidorCaseDTO retornado ao novo ouvidor não expõe conclusões anteriores
+// (parecer, defesa, relatório final, histórico da OG), protegendo a imparcialidade da análise.
 @Service
 @RequiredArgsConstructor
+// Fase 5 — gerencia submissão, consulta e análise de recursos por denunciante/denunciado e pelo novo ouvidor designado.
 public class AppealServiceImpl implements AppealService {
 
     private final ReportService reportService;
@@ -43,6 +54,7 @@ public class AppealServiceImpl implements AppealService {
     private final UserInfoRepository userInfoRepository;
     private final OuvidorAssignmentService ouvidorAssignmentService;
 
+    // Abre recurso para a parte autenticada; sorteia novo ouvidor (anti-viés) e aplica regra de merge se ambas as partes recorrem.
     @Override
     @Transactional
     public AppealResponseDTO submit(Long reportId, AppealRequestDTO request) {
@@ -52,6 +64,7 @@ public class AppealServiceImpl implements AppealService {
 
         ReportEntity report = reportService.findEntityById(reportId);
 
+        // Recurso só é permitido após validação da OG; bloqueia tentativas prematuras.
         if (report.getStatus() != ReportStatus.GENERAL_VALIDATED) {
             throw new BusinessException(
                     "O recurso só pode ser aberto após a decisão do Ouvidor Geral.",
@@ -62,6 +75,7 @@ public class AppealServiceImpl implements AppealService {
         UserInfoEntity appellant = currentUser();
         AppellantRole role = resolveAppellantRole(report, appellant, request.appellantRole());
 
+        // Verifica unicidade por parte: UNIQUE (report_id, appellant_role) no nível de aplicação.
         if (appealRepository.findByReportIdAndAppellantRole(reportId, role).isPresent()) {
             throw new BusinessException(
                     "Esta parte já apresentou recurso para este caso.",
@@ -72,8 +86,10 @@ public class AppealServiceImpl implements AppealService {
         List<AppealEntity> existing = appealRepository.findAllByReportId(reportId);
         UserInfoEntity newOuvidor;
         if (!existing.isEmpty() && existing.get(0).getNewOuvidor() != null) {
+            // Regra de merge: reutiliza o ouvidor já sorteado no primeiro recurso.
             newOuvidor = existing.get(0).getNewOuvidor();
         } else {
+            // Primeiro recurso do caso: sorteia novo ouvidor excluindo os que já participaram.
             newOuvidor = ouvidorAssignmentService.assignOuvidor(collectOuvidorIdsAlreadyOnCase(report));
         }
 
@@ -88,8 +104,10 @@ public class AppealServiceImpl implements AppealService {
         entity = appealRepository.save(entity);
 
         if (existing.isEmpty()) {
+            // Primeiro recurso: atualiza o status da manifestação para APPEAL_UNDER_ANALYSIS.
             report.setStatus(ReportStatus.APPEAL_UNDER_ANALYSIS);
         } else {
+            // Segundo recurso (merge): propaga o ouvidor designado para o primeiro recurso, caso ainda não tenha.
             existing.forEach(a -> {
                 if (a.getNewOuvidor() == null) {
                     a.setNewOuvidor(newOuvidor);
@@ -101,12 +119,14 @@ public class AppealServiceImpl implements AppealService {
         return toDTO(entity);
     }
 
+    // Lista todos os recursos abertos para uma manifestação.
     @Override
     public List<AppealResponseDTO> listByReport(Long reportId) {
         reportService.findEntityById(reportId); // 404 se não existir
         return appealRepository.findAllByReportId(reportId).stream().map(this::toDTO).toList();
     }
 
+    // Retorna casos onde o ouvidor autenticado foi designado como novo ouvidor de recurso; deduplicação por ID evita StackOverflow do @Data bidirecional.
     @Override
     public List<OuvidorCaseDTO> findAppealCasesAssignedToCurrentOuvidor() {
         UserInfoEntity user = currentUser();
@@ -117,6 +137,8 @@ public class AppealServiceImpl implements AppealService {
             );
         }
 
+        // LinkedHashMap preserva a ordem de inserção; deduplicação por ID evita conflitos
+        // de StackOverflow causados pela navegação bidirecional do @Data do Lombok.
         return appealRepository.findAllByNewOuvidorId(user.getId()).stream()
                 .map(AppealEntity::getReport)
                 .filter(Objects::nonNull)
@@ -131,6 +153,7 @@ public class AppealServiceImpl implements AppealService {
                 .toList();
     }
 
+    // Novo ouvidor emite relatório consolidado do recurso; avança status para APPEAL_AWAITING_GENERAL (fila da OG).
     @Override
     @Transactional
     public FinalReportResponseDTO submitAppealReport(Long reportId, FinalReportRequestDTO request) {
@@ -142,6 +165,7 @@ public class AppealServiceImpl implements AppealService {
         ReportEntity report = reportService.findEntityById(reportId);
         UserInfoEntity newOuvidor = currentUser();
 
+        // Verifica se o ouvidor autenticado é de fato o designado para os recursos deste caso.
         List<AppealEntity> appeals = appealRepository.findAllByReportId(reportId);
         boolean isAssigned = appeals.stream().anyMatch(a -> a.getNewOuvidor() != null
                 && Objects.equals(a.getNewOuvidor().getId(), newOuvidor.getId()));
@@ -152,6 +176,7 @@ public class AppealServiceImpl implements AppealService {
             );
         }
 
+        // Upsert: reutiliza registro existente se houver (ex.: correção antes da OG avaliar).
         AppealReportEntity entity = appealReportRepository.findByReportId(reportId)
                 .orElseGet(AppealReportEntity::new);
         entity.setReport(report);
@@ -162,12 +187,14 @@ public class AppealServiceImpl implements AppealService {
             entity.setPenaltyType(request.penaltyType());
             entity.setPenaltyDescription(trim(request.penaltyDescription()));
         } else {
+            // NEGAR: limpa penalidade para evitar dados inconsistentes no banco.
             entity.setPenaltyType(null);
             entity.setPenaltyDescription(null);
         }
         entity.setSubmittedAt(LocalDateTime.now());
         entity = appealReportRepository.save(entity);
 
+        // Avança todos os recursos do caso para AWAITING_GENERAL sincronicamente.
         appeals.forEach(a -> {
             a.setStatus(AppealStatus.AWAITING_GENERAL);
             appealRepository.save(a);
@@ -190,6 +217,7 @@ public class AppealServiceImpl implements AppealService {
         );
     }
 
+    // ACATAR exige penalidade; NEGAR exige justificativa.
     private void validate(FinalReportRequestDTO request) {
         switch (request.decision()) {
             case ACATAR -> {
@@ -211,6 +239,7 @@ public class AppealServiceImpl implements AppealService {
         }
     }
 
+    // Infere se o usuário é DENUNCIANTE ou DENUNCIADO com base no vínculo com a manifestação.
     private AppellantRole resolveAppellantRole(ReportEntity report,
                                                UserInfoEntity appellant,
                                                AppellantRole hint) {
@@ -219,6 +248,7 @@ public class AppealServiceImpl implements AppealService {
         boolean isDenunciado = report.getDenunciadoUser() != null
                 && Objects.equals(report.getDenunciadoUser().getId(), appellant.getId());
 
+        // Bloqueia usuários sem vínculo com o caso (exceto ADMIN, que pode usar o hint).
         if (!isDenunciante && !isDenunciado && appellant.getRole() != Role.ADMIN) {
             throw new BusinessException(
                     "Apenas o denunciante ou o denunciado podem recorrer.",
@@ -226,6 +256,7 @@ public class AppealServiceImpl implements AppealService {
             );
         }
 
+        // ADMIN usa o hint apenas quando não é possível inferir o papel automaticamente.
         AppellantRole inferred = isDenunciante ? AppellantRole.DENUNCIANTE
                                 : isDenunciado ? AppellantRole.DENUNCIADO
                                 : hint;
@@ -235,6 +266,7 @@ public class AppealServiceImpl implements AppealService {
         return inferred;
     }
 
+    // Coleta IDs de ouvidores que já tocaram o caso para garantir anti-viés na designação do novo ouvidor do recurso.
     private List<Long> collectOuvidorIdsAlreadyOnCase(ReportEntity report) {
         List<Long> ids = new ArrayList<>();
         if (report.getOuvidor() != null) {
@@ -249,12 +281,14 @@ public class AppealServiceImpl implements AppealService {
         return ids;
     }
 
+    // Retorna a entidade do usuário autenticado pelo SecurityContext.
     private UserInfoEntity currentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userInfoRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário autenticado não encontrado"));
     }
 
+    // Converte AppealEntity para o DTO de resposta.
     private AppealResponseDTO toDTO(AppealEntity entity) {
         return new AppealResponseDTO(
                 entity.getId(),
@@ -271,6 +305,7 @@ public class AppealServiceImpl implements AppealService {
         );
     }
 
+    // Monta o DTO para o novo ouvidor omitindo conclusões anteriores (parecer, defesa, relatório final) — garantia de anti-viés.
     private OuvidorCaseDTO toAppealCaseDTO(ReportEntity report) {
         ReportAiAnalysedEntity ai = report.getReportAiAnalysed();
         return new OuvidorCaseDTO(
@@ -282,11 +317,13 @@ public class AppealServiceImpl implements AppealService {
                 report.getStatus() != null ? report.getStatus().name() : null,
                 ai != null ? ai.getCategory() : null,
                 ai != null ? ai.getRisk() : null,
+                // Reutiliza o campo para indicar se o AppealReport já foi submetido.
                 appealReportRepository.findByReportId(report.getId()).isPresent(),
                 report.getCreatedAt()
         );
     }
 
+    // Retorna null para strings vazias, evitando persistir valores sem conteúdo.
     private static String trim(String value) {
         if (value == null) {
             return null;

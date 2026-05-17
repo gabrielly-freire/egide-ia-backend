@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 import java.util.Optional;
 
+// Repositório genérico base que implementa soft-delete e consultas filtradas por active = true.
+// Todas as operações de exclusão marcam o campo active = false em vez de remover o registro do banco.
+// As queries sobrescritas garantem que registros inativos sejam excluídos dos resultados automaticamente.
 @NoRepositoryBean
 public interface GenericRepository<T extends BaseEntity> extends JpaRepository<T, Long> {
 

@@ -3,6 +3,8 @@ package br.imd.ufrn.egide.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+// DTO de entrada/saída para a entidade de triagem pós-IA (ReportProcessedEntity).
+// Consolida categoria, risco, status e indicador de conflito atribuídos após a análise automatizada.
 public record ReportProcessedDTO(
         Long id,
 

@@ -14,6 +14,8 @@ import br.imd.ufrn.egide.dto.ErrorMessage;
 import br.imd.ufrn.egide.utils.exception.BusinessException;
 import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 
+// Handler global de exceções da API; intercepta todas as exceções não tratadas nos controllers
+// e retorna respostas HTTP padronizadas no formato ErrorMessage.
 @ControllerAdvice
 public class HandlerGlobalException {
 

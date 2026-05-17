@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+// Fase 2 — gerencia emissão e consulta do parecer preliminar pelo Ouvidor designado ao caso.
 @Service
 @RequiredArgsConstructor
 public class PreliminaryReportServiceImpl implements PreliminaryReportService {
@@ -38,6 +39,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
     private final PreliminaryReportRepository preliminaryReportRepository;
     private final UserInfoRepository userInfoRepository;
 
+    // Chama o microserviço de IA para obter sugestão de resposta usando dados anonimizados quando disponíveis.
     @Override
     public ReportResponseSuggestionResponseDTO suggestResponse(Long reportId) {
         ReportEntity report = reportService.findEntityById(reportId);
@@ -60,6 +62,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         );
     }
 
+    // Valida e persiste o parecer; avança status para PRELIMINARY_ISSUED ou CLOSED_NO_PROOFS conforme a decisão.
     @Override
     @Transactional
     public PreliminaryReportResponseDTO submit(Long reportId, PreliminaryReportRequestDTO request) {
@@ -108,6 +111,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         return toDTO(entity, report);
     }
 
+    // Recupera o parecer preliminar existente ou lança 404 se ainda não foi emitido.
     @Override
     public PreliminaryReportResponseDTO getByReportId(Long reportId) {
         PreliminaryReportEntity entity = preliminaryReportRepository.findByReportId(reportId)
@@ -115,6 +119,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         return toDTO(entity, entity.getReport());
     }
 
+    // ACATAR exige penalidade; NEGAR e NEGAR_FALTA_PROVAS exigem justificativa.
     private void validateBusinessRules(PreliminaryReportRequestDTO request) {
         switch (request.decision()) {
             case ACATAR -> {
@@ -136,6 +141,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         }
     }
 
+    // Retorna o usuário autenticado garantindo que é LISTENER ou ADMIN.
     private UserInfoEntity requireOuvidor() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserInfoEntity user = userInfoRepository.findByUsername(username)
@@ -149,6 +155,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         return user;
     }
 
+    // Impede que um ouvidor diferente do designado edite o caso.
     private void ensureAssignedOuvidor(ReportEntity report, UserInfoEntity ouvidor) {
         if (ouvidor.getRole() == Role.ADMIN) {
             return; // Admin pode operar em nome de qualquer ouvidor.
@@ -161,6 +168,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         }
     }
 
+    // Verifica se o texto do parecer foi usado sem alteração da sugestão da IA (flag usedAiSuggestion).
     private boolean matchesSuggestion(PreliminaryReportEntity entity, String aiSuggestion) {
         String candidate = entity.getJustification();
         if (candidate == null) {
@@ -172,10 +180,12 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         return normalize(candidate).equals(normalize(aiSuggestion));
     }
 
+    // Colapsa espaços múltiplos para comparação normalizada de strings.
     private static String normalize(String value) {
         return value == null ? "" : value.replaceAll("\\s+", " ").trim();
     }
 
+    // Retorna null para strings vazias, evitando persistir valores sem conteúdo.
     private static String trim(String value) {
         if (value == null) {
             return null;
@@ -184,6 +194,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
+    // Converte entidade + report para o DTO de resposta ao cliente.
     private PreliminaryReportResponseDTO toDTO(PreliminaryReportEntity entity, ReportEntity report) {
         return new PreliminaryReportResponseDTO(
                 entity.getId(),

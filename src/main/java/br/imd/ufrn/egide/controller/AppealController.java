@@ -21,6 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+// Controller responsável pelas operações da Fase 5 do fluxo de Ouvidoria.
+// Agrupa dois perfis de usuário:
+//   - REMONSTRANT: pode abrir recurso após GENERAL_VALIDATED.
+//   - LISTENER: novo ouvidor consulta os casos atribuídos a ele e emite o AppealReport.
+// Toda a lógica de negócio (anti-viés, regra de merge, unicidade por parte) é delegada
+// ao AppealServiceImpl; este controller é responsável apenas pelo roteamento HTTP.
+// Nota: o path base /v1 sem prefixo específico é usado para os endpoints de submissão de recurso
+// e listagem por manifestação, enquanto /recurso agrupa os endpoints do novo ouvidor.
 @AllArgsConstructor
 @RestController
 @RequestMapping("/v1")

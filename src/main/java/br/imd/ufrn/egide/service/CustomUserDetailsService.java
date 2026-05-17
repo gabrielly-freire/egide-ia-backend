@@ -10,10 +10,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+// Implementação de UserDetailsService para integração do Spring Security com o repositório de usuários.
+// Utilizado pelo DaoAuthenticationProvider durante a autenticação via username e senha.
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserInfoRepository repository;
 
+    // Carrega o UserDetails (UserInfoEntity) pelo username; lança UsernameNotFoundException se não encontrado.
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserInfoEntity user = repository.findByUsername(username)

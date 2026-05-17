@@ -19,6 +19,10 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
+// Configuração central de segurança da aplicação (Spring Security).
+// Define política stateless (sem sessão), rotas públicas (Swagger e login),
+// provedor de autenticação baseado em DAO com BCrypt e injeta o filtro JWT antes do filtro padrão.
+// @EnableMethodSecurity habilita @PreAuthorize nos controllers para controle de acesso por papel.
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;

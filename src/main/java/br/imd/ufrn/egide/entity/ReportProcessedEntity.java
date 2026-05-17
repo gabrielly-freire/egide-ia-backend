@@ -11,6 +11,9 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Table(name = "report_processed")
 @SQLRestriction(value = "active = true")
+// Entidade de triagem que consolida o resultado do processamento pós-IA de uma manifestação.
+// Criada ou atualizada pelo ReportProcessedService após confirmação manual ou automática dos dados de IA.
+// Possui relação @OneToOne exclusiva com ReportEntity (unique = true no join column).
 public class ReportProcessedEntity extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")

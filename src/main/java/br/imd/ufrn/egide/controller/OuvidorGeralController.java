@@ -19,6 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+// Controller responsável pelas operações da Fase 4 do fluxo de Ouvidoria.
+// Expõe endpoints exclusivos para o Ouvidor Geral (GENERAL_LISTENER) e ADMIN,
+// permitindo consulta da fila de casos pendentes e execução das três ações disponíveis:
+//   - Validar: confirma o relatório como está.
+//   - Alterar: substitui a decisão/penalidade do ouvidor pela da OG.
+//   - Repassar: designa novo ouvidor imparcial (máximo 1 vez por caso — regra de não-loop).
+// Toda lógica de negócio é delegada ao GeneralValidationServiceImpl;
+// este controller é responsável apenas pelo roteamento e validação de entrada.
 @AllArgsConstructor
 @RestController
 @RequestMapping("/v1/ouvidor-geral")

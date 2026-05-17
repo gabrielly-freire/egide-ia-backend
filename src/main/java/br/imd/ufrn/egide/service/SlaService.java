@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 
 @Service
 @Slf4j
+// Serviço de monitoramento de SLA das manifestações pendentes.
+// Executa verificações periódicas a cada 60 segundos para alertar sobre atrasos e prazos iminentes.
+// O prazo padrão é de 5 dias; manifestações PENDING além desse prazo geram alertas de violação.
 public class SlaService {
 
     @Autowired
@@ -18,6 +21,7 @@ public class SlaService {
 
     private final int prazo = 5;
 
+    // Verifica se há manifestações PENDING com mais de 5 dias sem atualização e registra alerta de SLA.
     @Scheduled(fixedRate = 60000)
     public void checkSla() {
         LocalDateTime limite = LocalDateTime.now().minusDays(prazo);
@@ -30,6 +34,8 @@ public class SlaService {
         }
     }
 
+    // Verifica manifestações PENDING que vencerão em menos de 24 horas e registra alerta preventivo.
+    // A janela de 10 minutos evita alertas duplicados a cada execução do scheduler.
     @Scheduled(fixedRate = 60000)
     public void checkPreventiveSla() {
         int diasPreventivo = prazo - 1;

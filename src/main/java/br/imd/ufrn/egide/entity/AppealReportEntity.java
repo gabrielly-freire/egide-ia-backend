@@ -8,6 +8,12 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
+// Relatório emitido pelo novo ouvidor ao concluir a análise do(s) recurso(s) — conclusão da Fase 5.
+// Possui o mesmo shape do FinalReportEntity (decisão ACATAR/NEGAR, penalidade, justificativa),
+// mas refere-se exclusivamente ao julgamento do recurso, não da manifestação original.
+// A unicidade por caso é garantida pelo JoinColumn UNIQUE: só existe 1 AppealReport por manifestação,
+// independentemente de quantos recursos foram abertos (regra de merge consolida tudo em 1 análise).
+// Após a submissão, o caso avança para APPEAL_AWAITING_GENERAL (fila da OG, Fase 4 novamente).
 @Data
 @Entity
 @Table(name = "appeal_report")

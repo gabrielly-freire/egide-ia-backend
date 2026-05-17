@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+// Repositório de recursos (appeals) da Fase 5; herda soft-delete de GenericRepository.
 @Repository
 public interface AppealRepository extends GenericRepository<AppealEntity> {
 

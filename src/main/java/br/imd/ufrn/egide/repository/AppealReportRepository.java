@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// Repositório de relatórios de recurso (Fase 5); herda soft-delete de GenericRepository.
 @Repository
 public interface AppealReportRepository extends GenericRepository<AppealReportEntity> {
 

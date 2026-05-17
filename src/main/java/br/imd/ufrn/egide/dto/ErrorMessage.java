@@ -7,6 +7,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
+// DTO de resposta padronizado para erros da API.
+// Retornado pelo HandlerGlobalException em todas as exceções tratadas.
+// O campo errors é utilizado exclusivamente em erros de validação (400), listando os campos inválidos.
 public class ErrorMessage {
     private int statusCode;
     private LocalDateTime timestamp;

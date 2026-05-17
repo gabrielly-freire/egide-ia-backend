@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
+// Fase 2 — permite ao Ouvidor registrar e consultar observações textuais sobre cada prova da manifestação.
 @Service
 @RequiredArgsConstructor
 public class ProofObservationServiceImpl implements ProofObservationService {
@@ -32,6 +33,7 @@ public class ProofObservationServiceImpl implements ProofObservationService {
     private final ReportService reportService;
     private final FileService fileService;
 
+    // Cria ou atualiza a observação do Ouvidor para um arquivo específico; vincula ao parecer em andamento.
     @Override
     @Transactional
     public ProofObservationResponseDTO upsert(Long reportId, Long fileId, ProofObservationRequestDTO request) {
@@ -69,6 +71,7 @@ public class ProofObservationServiceImpl implements ProofObservationService {
         return toDTO(entity);
     }
 
+    // Lista todas as observações registradas pelo Ouvidor nos arquivos de uma manifestação.
     @Override
     public List<ProofObservationResponseDTO> listByReport(Long reportId) {
         reportService.findEntityById(reportId);
@@ -78,6 +81,7 @@ public class ProofObservationServiceImpl implements ProofObservationService {
                 .toList();
     }
 
+    // Retorna o usuário autenticado garantindo que é LISTENER ou ADMIN.
     private UserInfoEntity requireOuvidor() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         UserInfoEntity user = userInfoRepository.findByUsername(username)
@@ -91,6 +95,7 @@ public class ProofObservationServiceImpl implements ProofObservationService {
         return user;
     }
 
+    // Impede que um ouvidor diferente do designado edite observações do caso.
     private void ensureAssignedOuvidor(ReportEntity report, UserInfoEntity ouvidor) {
         if (ouvidor.getRole() == Role.ADMIN) {
             return;
@@ -103,6 +108,7 @@ public class ProofObservationServiceImpl implements ProofObservationService {
         }
     }
 
+    // Converte a entidade de observação para o DTO de resposta.
     private ProofObservationResponseDTO toDTO(ProofObservationEntity entity) {
         FileEntity file = entity.getFile();
         return new ProofObservationResponseDTO(

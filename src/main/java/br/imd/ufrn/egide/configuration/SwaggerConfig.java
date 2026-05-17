@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+// Configuração do Springdoc OpenAPI (Swagger UI) com suporte a autenticação Bearer JWT.
+// Todos os endpoints exigem o header Authorization: Bearer <token> para testes via Swagger UI.
 public class SwaggerConfig {
 
     @Bean

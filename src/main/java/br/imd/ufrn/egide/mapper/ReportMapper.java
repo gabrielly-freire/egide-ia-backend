@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
+// Mapper MapStruct para conversão entre ReportEntity e ReportDTO.
 public interface ReportMapper {
 
     @Mapping(source = "userInfo.id", target = "userInfoId")

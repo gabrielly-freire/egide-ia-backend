@@ -18,11 +18,17 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+// Filtro de autenticação JWT executado uma vez por requisição.
+// Extrai o token do header Authorization, valida assinatura e expiração,
+// e injeta a autenticação no SecurityContextHolder para autorização downstream.
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
+    // Intercepta a requisição, extrai e valida o token JWT e autentica o usuário no contexto de segurança.
+    // Requisições sem header Authorization ou com token inválido são encaminhadas sem autenticação
+    // para que o CustomAuthenticationEntryPoint retorne 401.
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,

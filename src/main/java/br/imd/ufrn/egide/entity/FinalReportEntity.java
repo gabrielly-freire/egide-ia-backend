@@ -8,6 +8,13 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
+// Relatório final emitido pelo Ouvidor na Fase 3, após análise da defesa do denunciado.
+// Nesta fase a decisão é binária (ACATAR / NEGAR) — NEGAR_FALTA_PROVAS é exclusivo da Fase 2.
+// O campo defenseId é uma referência ao registro de defesa gerenciado pela Pessoa 2 (módulo de defesa);
+// por ora é apenas um BIGINT sem FK enforçada no banco, pois a migration correspondente ainda não foi
+// implementada. Quando implementada, será adicionada como FK em migration posterior.
+// Existe no máximo 1 registro por manifestação (UNIQUE via JoinColumn).
+// Após submissão, o status da manifestação avança para FINAL_ISSUED e o caso entra na fila da OG (Fase 4).
 @Data
 @Entity
 @Table(name = "final_report")

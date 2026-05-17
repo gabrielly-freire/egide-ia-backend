@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// Repositório de pareceres preliminares (Fase 2); herda soft-delete de GenericRepository.
 @Repository
 public interface PreliminaryReportRepository extends GenericRepository<PreliminaryReportEntity> {
 

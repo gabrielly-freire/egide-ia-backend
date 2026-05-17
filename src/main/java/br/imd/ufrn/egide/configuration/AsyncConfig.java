@@ -9,6 +9,9 @@ import java.util.concurrent.Executor;
 
 @Configuration
 @EnableAsync
+// Configuração do pool de threads assíncronas da aplicação.
+// O bean "aiExecutor" é utilizado pelo ReportCreatedListener para processar o pipeline de IA
+// sem bloquear a thread da requisição HTTP que criou a manifestação.
 public class AsyncConfig {
     @Bean(name = "aiExecutor")
     public Executor aiExecutor() {

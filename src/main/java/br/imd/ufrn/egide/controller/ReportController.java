@@ -22,6 +22,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/v1/report")
 @Tag(name = "Denúncia", description = "Gerenciamento de denúncias")
+// Expõe endpoints REST para o ciclo de vida da manifestação: submissão, listagem, parecer preliminar, observações, relatório final e pesquisa de satisfação.
 public class ReportController {
 
     private final ReportService reportService;

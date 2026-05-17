@@ -9,6 +9,14 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
+// Registro auditável de cada ação executada pelo Ouvidor Geral na Fase 4.
+// Cada decisão (VALIDATE, ALTER, REPASS) gera um novo registro independente,
+// permitindo rastrear o histórico completo de ações da OG sobre um caso.
+// Os campos finalReport e appealReport são mutuamente exclusivos por ação:
+//   - finalReport é preenchido quando a OG avalia um relatório da Fase 3 (status FINAL_ISSUED);
+//   - appealReport é preenchido quando a OG avalia um relatório da Fase 5 (status APPEAL_AWAITING_GENERAL).
+// Os campos altered* só fazem sentido quando action = ALTER; permanecem nulos nas demais ações.
+// O campo repassNewOuvidor só é preenchido quando action = REPASS.
 @Data
 @Entity
 @Table(name = "general_validation")

@@ -11,6 +11,8 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Table(name = "department")
 @SQLRestriction(value = "active = true")
+// Entidade de departamento institucional ao qual os usuários do sistema pertencem.
+// O @SQLRestriction garante que apenas registros ativos sejam retornados por padrão (soft-delete herdado de BaseEntity).
 public class DepartmentEntity extends BaseEntity {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)

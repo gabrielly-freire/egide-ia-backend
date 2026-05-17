@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// Repositório de entidades de triagem pós-IA; herda soft-delete de GenericRepository.
 @Repository
 public interface ReportProcessedRepository extends GenericRepository<ReportProcessedEntity> {
 

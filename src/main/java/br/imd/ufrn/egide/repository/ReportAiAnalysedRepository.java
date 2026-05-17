@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+// Repositório de resultados de análise de IA; estende JpaRepository diretamente pois
+// não utiliza soft-delete próprio (herda o filtro via @SQLRestriction na entidade).
 @Repository
 public interface ReportAiAnalysedRepository extends JpaRepository<ReportAiAnalysedEntity, Long> {
 

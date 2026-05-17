@@ -8,6 +8,14 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
+// Parecer preliminar emitido pelo Ouvidor na Fase 2 do fluxo de Ouvidoria.
+// Registra a decisão (ACATAR / NEGAR / NEGAR_FALTA_PROVAS), a penalidade sugerida
+// e a rastreabilidade de uso da IA: aiSuggestion armazena o texto sugerido pelo modelo,
+// enquanto usedAiSuggestion indica se o ouvidor adotou a sugestão — dado estratégico
+// para auditoria de dependência humana-IA no processo decisório.
+// Decisão NEGAR_FALTA_PROVAS é exclusiva desta fase; encerra o caso sem notificar o denunciado
+// e transiciona o status para CLOSED_NO_PROOFS.
+// Existe no máximo 1 registro por manifestação (UNIQUE via JoinColumn).
 @Data
 @Entity
 @Table(name = "preliminary_report")

@@ -22,12 +22,16 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Service
+// Implementação de FileService; gerencia upload, validação e leitura de arquivos de evidência.
+// Arquivos são armazenados no diretório "uploads/" com nome UUID para evitar colisões.
 public class FileServiceImpl implements FileService {
 
     private final String UPLOAD_DIR = "uploads/";
 
     private final FileRepository fileRepository;
 
+    // Valida e salva cada arquivo da lista no disco e registra metadados no banco vinculados à manifestação.
+    // Aceita apenas png, jpeg e pdf com tamanho máximo de 20 MB.
     @Override
     public void upload(List<MultipartFile> files, ReportEntity report) {
         for (MultipartFile file : files) {
@@ -55,6 +59,7 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    // Valida que o arquivo não está vazio, não excede 20 MB e tem Content-Type permitido (png, jpeg, pdf).
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new BusinessException("Arquivo vazio", HttpStatus.BAD_REQUEST);
@@ -72,17 +77,20 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    // Retorna a entidade de arquivo pelo id; lança ResourceNotFoundException se não encontrado.
     @Override
     public FileEntity findById(Long id) {
         return fileRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Arquivo não encontrado"));
     }
 
+    // Retorna todos os arquivos ativos de uma manifestação pelo seu id.
     @Override
     public List<FileEntity> findAllByReportId(Long reportId) {
         return fileRepository.findAllByReportId(reportId);
     }
 
+    // Constrói e retorna um UrlResource a partir do caminho físico do arquivo; lança exceção se o arquivo não existir no disco.
     @Override
     public Resource findResourceById(Long id) {
         FileEntity file = findById(id);

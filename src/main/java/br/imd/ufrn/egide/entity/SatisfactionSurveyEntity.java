@@ -10,6 +10,9 @@ import lombok.EqualsAndHashCode;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
+// Entidade de pesquisa de satisfação vinculada a uma manifestação encerrada.
+// Regra de negócio: apenas uma pesquisa por manifestação é permitida; a unicidade é garantida
+// pela verificação no ReportServiceImpl antes da persistência.
 public class SatisfactionSurveyEntity extends BaseEntity {
 
     @OneToOne

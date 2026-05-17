@@ -9,6 +9,10 @@ import jakarta.persistence.PreUpdate;
 import java.time.LocalDateTime;
 
 @MappedSuperclass
+// Superclasse mapeada compartilhada por todas as entidades do sistema.
+// Fornece id auto-gerado, soft-delete (campo active) e timestamps automáticos de criação/atualização.
+// O campo active = false é utilizado como exclusão lógica; o filtro @SQLRestriction nas subclasses
+// garante que registros inativos sejam invisíveis automaticamente para as queries JPA.
 public abstract class BaseEntity {
 
     @Id
@@ -19,8 +23,13 @@ public abstract class BaseEntity {
     protected LocalDateTime createdAt;
     protected LocalDateTime updatedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Boolean getActive() {
         return active;

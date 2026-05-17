@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/departments")
 @Tag(name = "Departamento", description = "Consulta de departamentos")
+// Controller de consulta de departamentos institucionais; acessível a todos os papéis autenticados.
+// Expõe apenas leitura (GET); criação e edição de departamentos são operações administrativas externas.
 public class DepartmentController {
 
     private final DepartmentService departmentService;

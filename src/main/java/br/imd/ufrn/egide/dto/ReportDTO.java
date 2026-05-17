@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 
+// DTO de saída principal da manifestação; retornado nos endpoints de listagem e consulta.
+// Para usuários com papel MANAGER, o título e a descrição podem ser substituídos pelas versões
+// anonimizadas quando há conflito de interesse detectado pela IA (ver ReportServiceImpl.toDTOForViewer).
 public record ReportDTO(
         Long id,
 
@@ -17,6 +20,12 @@ public record ReportDTO(
 
         LocalDate dateOfOccurrence,
 
-        Long userInfoId
+        Long userInfoId,
+
+        String status,
+
+        Long ouvidorId,
+
+        String ouvidorName
 ) {
 }

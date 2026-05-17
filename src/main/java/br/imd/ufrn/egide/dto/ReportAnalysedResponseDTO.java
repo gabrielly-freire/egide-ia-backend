@@ -6,6 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+// DTO de resposta do serviço de IA com a classificação da manifestação.
+// conflictedUserIds lista os IDs (string) dos usuários com conflito detectado.
+// managerConflict indica especificamente se o conflito envolve um usuário com papel MANAGER,
+// o que aciona a regra de ocultação de dados para gestores no ReportServiceImpl.
 public record ReportAnalysedResponseDTO(
         @JsonProperty("report_id") Long reportId,
         ReportCategory category,

@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Component
+// Entry point de autenticação (HTTP 401) para requisições sem token ou com token inválido.
+// Retorna JSON padronizado no mesmo formato do ErrorMessage para consistência das respostas de erro.
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override

@@ -6,6 +6,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
+// Ponto de entrada da aplicação Égide IA Backend.
+// Habilita o agendamento de tarefas (@EnableScheduling) para o monitoramento de SLA.
 public class Application {
 
 	public static void main(String[] args) {

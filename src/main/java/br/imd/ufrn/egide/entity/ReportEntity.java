@@ -8,6 +8,13 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDate;
 import java.util.List;
 
+// Entidade central da manifestação no sistema de Ouvidoria.
+// Agrega todos os vínculos do ciclo de vida: ouvidor designado (sorteado da pool), denunciado,
+// parecer preliminar (Fase 2), relatório final (Fase 3), recursos (Fase 5) e relatório de recurso.
+// O campo repassCount controla a regra de não-loop da OG: a OG só pode repassar um caso 1 vez;
+// tentativas subsequentes são bloqueadas no GeneralValidationServiceImpl.
+// O filtro @SQLRestriction garante que registros com active = false (soft-delete) sejam invisíveis
+// automaticamente para todas as queries JPA, sem necessidade de cláusula manual.
 @Data
 @Entity
 @Table(name = "report")
@@ -33,6 +40,17 @@ public class ReportEntity extends BaseEntity {
     @JoinColumn(name = "user_info_id")
     private UserInfoEntity userInfo;
 
+    @ManyToOne
+    @JoinColumn(name = "ouvidor_id")
+    private UserInfoEntity ouvidor;
+
+    @ManyToOne
+    @JoinColumn(name = "denunciado_user_id")
+    private UserInfoEntity denunciadoUser;
+
+    @Column(name = "repass_count", nullable = false)
+    private Integer repassCount = 0;
+
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
     private List<FileEntity> files;
 
@@ -41,4 +59,16 @@ public class ReportEntity extends BaseEntity {
 
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
     private ReportAiAnalysedEntity reportAiAnalysed;
+
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    private PreliminaryReportEntity preliminaryReport;
+
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    private FinalReportEntity finalReport;
+
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    private AppealReportEntity appealReport;
+
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
+    private List<AppealEntity> appeals;
 }

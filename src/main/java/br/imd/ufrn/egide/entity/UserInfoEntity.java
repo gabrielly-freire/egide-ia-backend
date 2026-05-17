@@ -15,6 +15,9 @@ import java.util.List;
 @Entity
 @Table(name = "user_info")
 @SQLRestriction(value = "active = true")
+// Entidade de usuário do sistema; implementa UserDetails para integração com Spring Security.
+// A autoridade é construída como "ROLE_<role>" para compatibilidade com @PreAuthorize("hasRole(...)").
+// O @SQLRestriction filtra usuários com active = false automaticamente em todas as queries JPA.
 public class UserInfoEntity extends BaseEntity implements UserDetails {
 
     @Column(unique = true)

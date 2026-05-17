@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.util.Date;
 
 @Service
+// Serviço de geração e validação de tokens JWT.
+// Utiliza a chave secreta e o tempo de expiração configurados no application.properties.
 public class JwtService {
 
     @Value("${security.jwt.secret}")
@@ -22,6 +24,7 @@ public class JwtService {
     @Value("${security.jwt.expiration-ms}")
     private Long expirationInMs;
 
+    // Gera token JWT assinado com HMAC-SHA contendo o username e o papel do usuário como claims.
     public String generateToken(UserInfoEntity user) {
         Instant now = Instant.now();
         return Jwts.builder()
@@ -33,15 +36,18 @@ public class JwtService {
                 .compact();
     }
 
+    // Extrai o subject (username) das claims do token JWT.
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
+    // Verifica se o token é válido: username coincide com o UserDetails e o token não está expirado.
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
+    // Retorna o tempo de expiração em segundos para inclusão na resposta de login.
     public Long getExpirationInSeconds() {
         return expirationInMs / 1000;
     }

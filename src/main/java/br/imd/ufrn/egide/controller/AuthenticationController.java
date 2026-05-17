@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/auth")
 @Tag(name = "Autenticação", description = "Autenticação e autorização")
+// Controller responsável pela autenticação de usuários e consulta do perfil autenticado.
+// Endpoints públicos (login) e protegidos (me) da rota /v1/auth.
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;

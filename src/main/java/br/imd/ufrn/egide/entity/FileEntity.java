@@ -8,6 +8,9 @@ import org.hibernate.annotations.SQLRestriction;
 @Entity
 @Table(name = "file")
 @SQLRestriction(value = "active = true")
+// Entidade de arquivo de evidência vinculada a uma manifestação ou a um recurso (appeal).
+// O campo path armazena o caminho físico no disco (diretório uploads/); nunca exposto na API.
+// Um arquivo pode estar vinculado a uma manifestação (report) ou a um recurso (appeal), mas não ambos.
 public class FileEntity extends BaseEntity {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,4 +22,8 @@ public class FileEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "report_id")
     private ReportEntity report;
+
+    @ManyToOne
+    @JoinColumn(name = "appeal_id")
+    private AppealEntity appeal;
 }

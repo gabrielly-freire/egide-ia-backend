@@ -13,6 +13,11 @@ import java.util.List;
 @Entity
 @Table(name = "report_ai_analysed")
 @SQLRestriction(value = "active = true")
+// Entidade que armazena o resultado da análise automática de IA para uma manifestação.
+// Gerada assincronamente pelo pipeline de IA após a criação da manifestação.
+// conflictedUserIds é uma coleção de elementos (tabela auxiliar) contendo os IDs dos usuários
+// com conflito de interesse detectado pelo modelo de IA.
+// managerConflict sinaliza especificamente conflito envolvendo um MANAGER, ativando ocultação de dados.
 public class ReportAiAnalysedEntity extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")

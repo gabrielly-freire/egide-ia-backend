@@ -79,6 +79,11 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public List<FileEntity> findAllByReportId(Long reportId) {
+        return fileRepository.findAllByReportId(reportId);
+    }
+
+    @Override
     public Resource findResourceById(Long id) {
         FileEntity file = findById(id);
 

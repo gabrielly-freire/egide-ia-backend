@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum Role {
     REMONSTRANT("Reclamante"),
     LISTENER("Ouvidor"),
+    GENERAL_LISTENER("Ouvidor Geral"),
     MANAGER("Gestor"),
     ADMIN("Administrador");
 

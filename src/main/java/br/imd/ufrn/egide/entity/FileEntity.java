@@ -19,4 +19,8 @@ public class FileEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "report_id")
     private ReportEntity report;
+
+    @ManyToOne
+    @JoinColumn(name = "appeal_id")
+    private AppealEntity appeal;
 }

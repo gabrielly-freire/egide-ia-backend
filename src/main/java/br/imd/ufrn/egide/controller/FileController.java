@@ -1,5 +1,6 @@
 package br.imd.ufrn.egide.controller;
 
+import br.imd.ufrn.egide.dto.FileDTO;
 import br.imd.ufrn.egide.entity.FileEntity;
 import br.imd.ufrn.egide.service.FileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @AllArgsConstructor
 @RestController
@@ -38,6 +41,16 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
+    }
+
+    @Operation(summary = "Listar provas (arquivos) de uma manifestação")
+    @GetMapping("/by-report/{reportId}")
+    @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
+    public ResponseEntity<List<FileDTO>> listByReport(@PathVariable Long reportId) {
+        List<FileDTO> files = fileService.findAllByReportId(reportId).stream()
+                .map(f -> new FileDTO(f.getId(), f.getName(), f.getContentType(), f.getSize()))
+                .toList();
+        return ResponseEntity.ok(files);
     }
 
     @Operation(summary = "Previsualização do arquivo")

@@ -17,6 +17,12 @@ public record ReportDTO(
 
         LocalDate dateOfOccurrence,
 
-        Long userInfoId
+        Long userInfoId,
+
+        String status,
+
+        Long ouvidorId,
+
+        String ouvidorName
 ) {
 }

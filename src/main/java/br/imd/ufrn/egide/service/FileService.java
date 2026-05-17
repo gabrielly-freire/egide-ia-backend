@@ -15,4 +15,5 @@ public interface FileService {
 
     Resource findResourceById(Long id);
 
+    List<FileEntity> findAllByReportId(Long reportId);
 }

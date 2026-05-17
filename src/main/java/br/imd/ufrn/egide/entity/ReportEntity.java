@@ -33,6 +33,17 @@ public class ReportEntity extends BaseEntity {
     @JoinColumn(name = "user_info_id")
     private UserInfoEntity userInfo;
 
+    @ManyToOne
+    @JoinColumn(name = "ouvidor_id")
+    private UserInfoEntity ouvidor;
+
+    @ManyToOne
+    @JoinColumn(name = "denunciado_user_id")
+    private UserInfoEntity denunciadoUser;
+
+    @Column(name = "repass_count", nullable = false)
+    private Integer repassCount = 0;
+
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
     private List<FileEntity> files;
 
@@ -41,4 +52,16 @@ public class ReportEntity extends BaseEntity {
 
     @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
     private ReportAiAnalysedEntity reportAiAnalysed;
+
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    private PreliminaryReportEntity preliminaryReport;
+
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    private FinalReportEntity finalReport;
+
+    @OneToOne(mappedBy = "report", cascade = CascadeType.ALL)
+    private AppealReportEntity appealReport;
+
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
+    private List<AppealEntity> appeals;
 }

@@ -9,4 +9,4 @@ public record SatisfactionSurveyRequestDTO(
         @Min(0) @Max(5) Integer speedRating,
         @Min(0) @Max(5) Integer resolutionRating,
         String comments
-) {}
+) { }

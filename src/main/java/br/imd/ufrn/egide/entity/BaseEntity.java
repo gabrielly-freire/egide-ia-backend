@@ -19,8 +19,13 @@ public abstract class BaseEntity {
     protected LocalDateTime createdAt;
     protected LocalDateTime updatedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Boolean getActive() {
         return active;

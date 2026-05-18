@@ -32,6 +32,7 @@ public class DefenseServiceImpl implements DefenseService {
     private final DefenseRepository defenseRepository;
     private final UserInfoRepository userInfoRepository;
     private final FileService fileService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -73,6 +74,10 @@ public class DefenseServiceImpl implements DefenseService {
 
         report.setStatus(ReportStatus.DEFENSE_UNDER_ANALYSIS);
         reportRepository.save(report);
+
+        if (report.getOuvidor() != null) {
+            notificationService.notifyOuvidorDefenseSubmitted(report.getId(), report.getOuvidor().getId());
+        }
 
         DefenseEntity refreshed = defenseRepository.findById(defense.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Defesa não encontrada"));

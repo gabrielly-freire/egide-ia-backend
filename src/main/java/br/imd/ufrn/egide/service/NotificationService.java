@@ -15,4 +15,10 @@ public interface NotificationService {
     void markAllAsRead();
 
     public void notifySlaExpired(Long reportId, Long recipientId);
+
+    void notifyOuvidorAssigned(Long reportId, Long ouvidorId);
+
+    void notifyDenunciantePreliminaryIssued(Long reportId, Long denuncianteId);
+
+    void notifyOuvidorDefenseSubmitted(Long reportId, Long ouvidorId);
 }

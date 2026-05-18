@@ -98,6 +98,10 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         entity.setSubmittedAt(LocalDateTime.now());
         entity = preliminaryReportRepository.save(entity);
 
+        if (report.getUserInfo() != null) {
+            notificationService.notifyDenunciantePreliminaryIssued(report.getId(), report.getUserInfo().getId());
+        }
+
         ReportStatus newStatus;
         if (request.decision() == PreliminaryReportDecision.NEGAR_FALTA_PROVAS) {
             newStatus = ReportStatus.CLOSED_NO_PROOFS;

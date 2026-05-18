@@ -247,6 +247,13 @@ public class ReportServiceImpl implements ReportService {
             throw new BusinessException("Pesquisa já realizada para esta manifestação.", HttpStatus.BAD_REQUEST);
         }
 
+        if (report.getStatus() != ReportStatus.CLOSED) {
+            throw new BusinessException(
+                    "A pesquisa só pode ser enviada após o relato ser marcado como concluído.",
+                    org.springframework.http.HttpStatus.BAD_REQUEST
+            );
+        }
+
         SatisfactionSurveyEntity survey = new SatisfactionSurveyEntity();
         survey.setReport(report);
         survey.setSpeedRating(dto.speedRating());

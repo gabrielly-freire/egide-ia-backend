@@ -47,6 +47,7 @@ public class ReportServiceImpl implements ReportService {
     private final UserInfoRepository userInfoRepository;
     private final SatisfactionSurveyRepository surveyRepository;
     private final OuvidorAssignmentService ouvidorAssignmentService;
+    private final NotificationService notificationService;
 
     private static final String PROTOCOL_NUMBER_PREFIX = "PM";
 
@@ -253,5 +254,26 @@ public class ReportServiceImpl implements ReportService {
         survey.setComments(dto.comments());
 
         surveyRepository.save(survey);
+    }
+
+    @Override
+    @Transactional
+    public ReportDTO concluirRelato(Long id) {
+        ReportEntity report = reportRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Relato não encontrado com o ID: " + id));
+
+        if (report.getStatus() == ReportStatus.CLOSED) {
+            throw new BusinessException("Este relato já está encerrado.", HttpStatus.BAD_REQUEST);
+        }
+
+        report.setStatus(ReportStatus.CLOSED);
+
+        ReportEntity savedReport = reportRepository.save(report);
+
+        if (savedReport.getOuvidor() != null) {
+            notificationService.notifySlaExpired(savedReport.getId(), savedReport.getOuvidor().getId());
+        }
+
+        return reportMapper.toDTO(savedReport);
     }
 }

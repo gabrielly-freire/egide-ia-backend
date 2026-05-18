@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import br.imd.ufrn.egide.dto.ReportDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -155,6 +156,14 @@ public class ReportController {
     @Operation(summary = "Buscar defesa de um caso")
     public ResponseEntity<DefenseDTO> getDefense(@PathVariable Long id) {
         return ResponseEntity.ok(defenseService.getDefense(id));
+    }
+
+    @PostMapping("/{id}/concluir")
+    @PreAuthorize("hasRole('GENERAL_LISTENER')")
+    @Operation(summary = "Conclui uma manifestação (Acesso exclusivo ao Ouvidor Geral)")
+    public ResponseEntity<ReportDTO> concluirRelato(@PathVariable Long id) {
+        ReportDTO response = reportService.concluirRelato(id);
+        return ResponseEntity.ok(response);
     }
 
 }

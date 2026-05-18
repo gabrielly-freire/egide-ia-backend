@@ -41,4 +41,6 @@ public interface ReportService {
 
     // Retorna entidades de manifestação cujo status esteja na lista informada; usado em outros services de fase.
     List<ReportEntity> findEntitiesByStatusIn(List<ReportStatus> statuses);
+
+    ReportDTO concluirRelato(Long id);
 }

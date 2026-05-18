@@ -119,4 +119,30 @@ public class NotificationServiceImpl implements NotificationService {
         return userInfoRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário autenticado não encontrado"));
     }
+
+    @Override
+    @Transactional
+    public void notifySlaExpired(Long reportId, Long recipientId) {
+        ReportEntity report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manifestação não encontrada"));
+
+
+        UserInfoEntity recipient = userInfoRepository.findById(recipientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Destinatário não encontrado"));
+
+
+        String protocol = report.getProtocolNumber() != null ? report.getProtocolNumber() : String.valueOf(report.getId());
+
+
+        NotificationEntity notification = new NotificationEntity();
+        notification.setRecipient(recipient);
+        notification.setReport(report);
+        notification.setType(NotificationType.PHASE3_STARTED);
+        notification.setTitle("Prazo Expirado");
+        notification.setMessage("A manifestação " + protocol + " excedeu o prazo de 10 dias.");
+
+
+        notificationRepository.save(notification);
+    }
+
 }

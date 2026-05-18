@@ -47,6 +47,7 @@ public class ReportServiceImpl implements ReportService {
     private final UserInfoRepository userInfoRepository;
     private final SatisfactionSurveyRepository surveyRepository;
     private final OuvidorAssignmentService ouvidorAssignmentService;
+    private final NotificationService notificationService;
 
     private static final String PROTOCOL_NUMBER_PREFIX = "PM";
 
@@ -246,6 +247,13 @@ public class ReportServiceImpl implements ReportService {
             throw new BusinessException("Pesquisa já realizada para esta manifestação.", HttpStatus.BAD_REQUEST);
         }
 
+        if (report.getStatus() != ReportStatus.CLOSED) {
+            throw new BusinessException(
+                    "A pesquisa só pode ser enviada após o relato ser marcado como concluído.",
+                    org.springframework.http.HttpStatus.BAD_REQUEST
+            );
+        }
+
         SatisfactionSurveyEntity survey = new SatisfactionSurveyEntity();
         survey.setReport(report);
         survey.setSpeedRating(dto.speedRating());
@@ -253,5 +261,26 @@ public class ReportServiceImpl implements ReportService {
         survey.setComments(dto.comments());
 
         surveyRepository.save(survey);
+    }
+
+    @Override
+    @Transactional
+    public ReportDTO concluirRelato(Long id) {
+        ReportEntity report = reportRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Relato não encontrado com o ID: " + id));
+
+        if (report.getStatus() == ReportStatus.CLOSED) {
+            throw new BusinessException("Este relato já está encerrado.", HttpStatus.BAD_REQUEST);
+        }
+
+        report.setStatus(ReportStatus.CLOSED);
+
+        ReportEntity savedReport = reportRepository.save(report);
+
+        if (savedReport.getOuvidor() != null) {
+            notificationService.notifySlaExpired(savedReport.getId(), savedReport.getOuvidor().getId());
+        }
+
+        return reportMapper.toDTO(savedReport);
     }
 }

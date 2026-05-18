@@ -5,6 +5,7 @@ import br.imd.ufrn.egide.service.DefenseService;
 import br.imd.ufrn.egide.service.FinalReportService;
 import br.imd.ufrn.egide.service.PreliminaryReportService;
 import br.imd.ufrn.egide.service.ProofObservationService;
+import br.imd.ufrn.egide.service.ReportExportService;
 import br.imd.ufrn.egide.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import br.imd.ufrn.egide.dto.ReportDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/v1/report")
 @Tag(name = "Denúncia", description = "Gerenciamento de denúncias")
-// Expõe endpoints REST para o ciclo de vida da manifestação: submissão, listagem, parecer preliminar, observações, relatório final e pesquisa de satisfação.
 public class ReportController {
 
     private final ReportService reportService;
@@ -31,6 +32,7 @@ public class ReportController {
     private final FinalReportService finalReportService;
     private final PreliminaryReportService preliminaryReportService;
     private final ProofObservationService proofObservationService;
+    private final ReportExportService exportService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('REMONSTRANT','ADMIN')")
@@ -157,4 +159,21 @@ public class ReportController {
         return ResponseEntity.ok(defenseService.getDefense(id));
     }
 
+    @PostMapping("/{id}/concluir")
+    @PreAuthorize("hasRole('GENERAL_LISTENER')")
+    @Operation(summary = "Conclui uma manifestação (Acesso exclusivo ao Ouvidor Geral)")
+    public ResponseEntity<ReportDTO> concluirRelato(@PathVariable Long id) {
+        ReportDTO response = reportService.concluirRelato(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/exportar")
+    @Operation(summary = "Gera o PDF consolidado da manifestação")
+    public ResponseEntity<byte[]> exportarPdf(@PathVariable Long id) {
+        byte[] pdf = exportService.generateReportPdf(id);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=relatorio-" + id + ".pdf")
+                .body(pdf);
+    }
 }

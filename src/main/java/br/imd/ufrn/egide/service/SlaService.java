@@ -1,54 +1,68 @@
 package br.imd.ufrn.egide.service;
 
+
+import br.imd.ufrn.egide.entity.ReportEntity;
 import br.imd.ufrn.egide.enums.ReportStatus;
 import br.imd.ufrn.egide.repository.ReportRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Service
 @Slf4j
-// Serviço de monitoramento de SLA das manifestações pendentes.
-// Executa verificações periódicas a cada 60 segundos para alertar sobre atrasos e prazos iminentes.
-// O prazo padrão é de 5 dias; manifestações PENDING além desse prazo geram alertas de violação.
+@RequiredArgsConstructor
 public class SlaService {
 
-    @Autowired
-    private ReportRepository repository;
 
-    private final int prazo = 5;
+    private final ReportRepository repository;
+    private final NotificationService notificationService;
 
-    // Verifica se há manifestações PENDING com mais de 5 dias sem atualização e registra alerta de SLA.
-    @Scheduled(fixedRate = 60000)
-    public void checkSla() {
-        LocalDateTime limite = LocalDateTime.now().minusDays(prazo);
 
-        var atrasados = repository.findAllByStatusAndCreatedAtBefore(ReportStatus.PENDING, limite);
+    private static final int SLA_DAYS = 10;
 
-        if (!atrasados.isEmpty()) {
-            log.warn("⚠️ ALERTA DE SLA: Existem {} manifestações pendentes há mais de {} dias!",
-                    atrasados.size(), prazo);
+
+    @Scheduled(cron = "0 0 0 * * ?") // Executa todo dia à meia-noite
+    public void checkAllDeadlines() {
+        log.info("Iniciando verificação diária de SLA...");
+
+
+        // Status que exigem atenção do ouvidor
+        List<ReportStatus> activeStatuses = List.of(
+                ReportStatus.PENDING,
+                ReportStatus.DEFENSE_OPEN,
+                ReportStatus.APPEAL_UNDER_ANALYSIS
+        );
+
+
+        List<ReportEntity> reports = repository.findByStatusIn(activeStatuses);
+        LocalDateTime limitDate = LocalDateTime.now().minusDays(SLA_DAYS);
+
+
+        for (ReportEntity report : reports) {
+            // Verifica se a última atualização (mudança de fase) foi há mais de 10 dias
+            if (report.getOuvidor() != null) {
+                notificationService.notifySlaExpired(report.getId(), report.getOuvidor().getId());
+            }
+            if (report.getUpdatedAt() != null && report.getUpdatedAt().isBefore(limitDate)) {
+                notifyResponsible(report);
+            }
         }
     }
 
-    // Verifica manifestações PENDING que vencerão em menos de 24 horas e registra alerta preventivo.
-    // A janela de 10 minutos evita alertas duplicados a cada execução do scheduler.
-    @Scheduled(fixedRate = 60000)
-    public void checkPreventiveSla() {
-        int diasPreventivo = prazo - 1;
 
-        LocalDateTime inicioJanela = LocalDateTime.now().minusDays(diasPreventivo).minusMinutes(10);
-        LocalDateTime fimJanela = LocalDateTime.now().minusDays(diasPreventivo);
+    private void notifyResponsible(ReportEntity report) {
+        if (report.getOuvidor() != null) {
+            log.warn("SLA violado para a manifestação {}. Notificando ouvidor {}",
+                    report.getProtocolNumber(), report.getOuvidor().getName());
 
-        var quaseAtrasados = repository.findAllByStatusAndCreatedAtBetween(
-                ReportStatus.PENDING, inicioJanela, fimJanela
-        );
 
-        if (!quaseAtrasados.isEmpty()) {
-            log.info("🔔 ALERTA PREVENTIVO: {} manifestações vencerão em 24 horas!", quaseAtrasados.size());
+            notificationService.notifyDenouncedPhase3Started(report.getId(), report.getOuvidor().getId());
         }
     }
 }

@@ -71,6 +71,10 @@ public class ReportServiceImpl implements ReportService {
         entity.setProtocolNumber(PROTOCOL_NUMBER_PREFIX + entity.getId());
         entity = reportRepository.save(entity);
 
+        if (entity.getOuvidor() != null) {
+            notificationService.notifyOuvidorAssigned(entity.getId(), entity.getOuvidor().getId());
+        }
+
         if (files != null && !files.isEmpty()) {
             fileService.upload(files, entity);
         }

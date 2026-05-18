@@ -45,12 +45,12 @@ public class SlaService {
 
 
         for (ReportEntity report : reports) {
-            // Verifica se a última atualização (mudança de fase) foi há mais de 10 dias
-            if (report.getOuvidor() != null) {
-                notificationService.notifySlaExpired(report.getId(), report.getOuvidor().getId());
-            }
             if (report.getUpdatedAt() != null && report.getUpdatedAt().isBefore(limitDate)) {
-                notifyResponsible(report);
+                if (report.getOuvidor() != null) {
+                    log.warn("SLA violado para a manifestação {}. Notificando ouvidor {}",
+                            report.getProtocolNumber(), report.getOuvidor().getName());
+                    notificationService.notifySlaExpired(report.getId(), report.getOuvidor().getId());
+                }
             }
         }
     }

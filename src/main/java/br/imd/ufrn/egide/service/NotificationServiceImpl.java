@@ -137,10 +137,84 @@ public class NotificationServiceImpl implements NotificationService {
         NotificationEntity notification = new NotificationEntity();
         notification.setRecipient(recipient);
         notification.setReport(report);
-        notification.setType(NotificationType.PHASE3_STARTED);
+        notification.setType(NotificationType.SLA_EXPIRED); // era PHASE3_STARTED — tipo incorreto
         notification.setTitle("Prazo Expirado");
         notification.setMessage("A manifestação " + protocol + " excedeu o prazo de 10 dias.");
 
+        notificationRepository.save(notification);
+    }
+
+    // Notifica o ouvidor sorteado logo após a criação da manifestação.
+    @Override
+    @Transactional
+    public void notifyOuvidorAssigned(Long reportId, Long ouvidorId) {
+        if (reportId == null || ouvidorId == null) {
+            throw new BusinessException("Parâmetros inválidos para notificação.", HttpStatus.BAD_REQUEST);
+        }
+
+        ReportEntity report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manifestação não encontrada"));
+
+        UserInfoEntity ouvidor = userInfoRepository.findById(ouvidorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ouvidor não encontrado"));
+
+        String protocol = report.getProtocolNumber() != null ? report.getProtocolNumber() : String.valueOf(report.getId());
+
+        NotificationEntity notification = new NotificationEntity();
+        notification.setRecipient(ouvidor);
+        notification.setReport(report);
+        notification.setType(NotificationType.OUVIDOR_ASSIGNED);
+        notification.setTitle("Novo caso atribuído");
+        notification.setMessage("A manifestação " + protocol + " foi atribuída a você para análise.");
+
+        notificationRepository.save(notification);
+    }
+
+    // Notifica o denunciante quando o parecer preliminar é emitido.
+    @Override
+    @Transactional
+    public void notifyDenunciantePreliminaryIssued(Long reportId, Long denuncianteId) {
+        if (reportId == null || denuncianteId == null) {
+            throw new BusinessException("Parâmetros inválidos para notificação.", HttpStatus.BAD_REQUEST);
+        }
+
+        ReportEntity report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manifestação não encontrada"));
+
+        UserInfoEntity denunciante = userInfoRepository.findById(denuncianteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Denunciante não encontrado"));
+
+        String protocol = report.getProtocolNumber() != null ? report.getProtocolNumber() : String.valueOf(report.getId());
+
+        NotificationEntity notification = new NotificationEntity();
+        notification.setRecipient(denunciante);
+        notification.setReport(report);
+        notification.setType(NotificationType.PRELIMINARY_REPORT_ISSUED);
+        notification.setTitle("Parecer emitido");
+        notification.setMessage("O parecer preliminar da manifestação " + protocol + " foi emitido. Acesse o sistema para acompanhar.");
+
+        notificationRepository.save(notification);
+    }
+
+    @Override
+    @Transactional
+    public void notifyOuvidorDefenseSubmitted(Long reportId, Long ouvidorId) {
+        ReportEntity report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manifestação não encontrada"));
+
+        UserInfoEntity ouvidor = userInfoRepository.findById(ouvidorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ouvidor não encontrado"));
+
+        String protocol = report.getProtocolNumber() != null
+                ? report.getProtocolNumber()
+                : String.valueOf(report.getId());
+
+        NotificationEntity notification = new NotificationEntity();
+        notification.setRecipient(ouvidor);
+        notification.setReport(report);
+        notification.setType(NotificationType.DEFENSE_SUBMITTED);
+        notification.setTitle("Defesa recebida");
+        notification.setMessage("O denunciado enviou a defesa da manifestação " + protocol + ". Analise para emitir o relatório final.");
 
         notificationRepository.save(notification);
     }

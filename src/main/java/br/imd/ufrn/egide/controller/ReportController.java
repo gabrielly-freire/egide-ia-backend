@@ -1,6 +1,7 @@
 package br.imd.ufrn.egide.controller;
 
 import br.imd.ufrn.egide.dto.*;
+import br.imd.ufrn.egide.service.DefenseService;
 import br.imd.ufrn.egide.service.FinalReportService;
 import br.imd.ufrn.egide.service.PreliminaryReportService;
 import br.imd.ufrn.egide.service.ProofObservationService;
@@ -26,9 +27,10 @@ import java.util.Map;
 public class ReportController {
 
     private final ReportService reportService;
+    private final DefenseService defenseService;
+    private final FinalReportService finalReportService;
     private final PreliminaryReportService preliminaryReportService;
     private final ProofObservationService proofObservationService;
-    private final FinalReportService finalReportService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('REMONSTRANT','ADMIN')")
@@ -136,4 +138,23 @@ public class ReportController {
         reportService.saveSurvey(id, surveyDTO);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping(value = "/{id}/defesa", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
+    @Operation(summary = "Enviar defesa do denunciado")
+    public ResponseEntity<DefenseDTO> submitDefense(
+            @PathVariable Long id,
+            @Valid @RequestPart("defense") DefenseRequestDTO defenseRequestDTO,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
+        return ResponseEntity.ok(defenseService.submitDefense(id, defenseRequestDTO, files));
+    }
+
+    @GetMapping("/{id}/defesa")
+    @PreAuthorize("hasAnyRole('REMONSTRANT','LISTENER','MANAGER','ADMIN')")
+    @Operation(summary = "Buscar defesa de um caso")
+    public ResponseEntity<DefenseDTO> getDefense(@PathVariable Long id) {
+        return ResponseEntity.ok(defenseService.getDefense(id));
+    }
+
 }

@@ -20,6 +20,8 @@ public interface ReportRepository extends GenericRepository<ReportEntity> {
 
     List<ReportEntity> findByUserInfoId(Long userInfoId);
 
+    List<ReportEntity> findByDenouncedUserIdAndStatusIn(Long denouncedUserId, List<ReportStatus> statuses);
+
     long countByStatus(ReportStatus status);
 
     List<ReportEntity> findByOuvidorId(Long ouvidorId);

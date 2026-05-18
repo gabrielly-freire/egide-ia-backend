@@ -78,7 +78,6 @@ public class UserInfoServiceImpl implements UserInfoService {
     public void delete(Long id) {
         userInfoRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Usuário não encontrado"));
-        //TODO: regras de exclusão -> quando é possível excluir ??
 
         userInfoRepository.deleteById(id);
     }

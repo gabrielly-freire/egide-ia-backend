@@ -19,9 +19,17 @@ public interface ReportMapper {
     @Mapping(source = "ouvidorId", target = "ouvidor.id")
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "files", ignore = true)
+    @Mapping(target = "protocolNumber", ignore = true)
+    @Mapping(target = "denouncedUser", ignore = true)
+    @Mapping(target = "phase3NotifiedAt", ignore = true)
+    @Mapping(target = "repassCount", ignore = true)
     @Mapping(target = "reportProcessed", ignore = true)
     @Mapping(target = "reportAiAnalysed", ignore = true)
     @Mapping(target = "preliminaryReport", ignore = true)
+    @Mapping(target = "defense", ignore = true)
+    @Mapping(target = "finalReport", ignore = true)
+    @Mapping(target = "appealReport", ignore = true)
+    @Mapping(target = "appeals", ignore = true)
     ReportEntity toEntity(ReportDTO dto);
 
 }

@@ -163,7 +163,8 @@ public class ReportServiceImpl implements ReportService {
                 base.userInfoId(),
                 base.status(),
                 base.ouvidorId(),
-                base.ouvidorName()
+                base.ouvidorName(),
+                base.createdAt()
         );
     }
 

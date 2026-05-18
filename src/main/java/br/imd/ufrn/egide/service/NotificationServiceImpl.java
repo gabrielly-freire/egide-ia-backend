@@ -1,0 +1,122 @@
+package br.imd.ufrn.egide.service;
+
+import br.imd.ufrn.egide.dto.NotificationResponseDTO;
+import br.imd.ufrn.egide.entity.NotificationEntity;
+import br.imd.ufrn.egide.entity.ReportEntity;
+import br.imd.ufrn.egide.entity.UserInfoEntity;
+import br.imd.ufrn.egide.enums.NotificationType;
+import br.imd.ufrn.egide.repository.NotificationRepository;
+import br.imd.ufrn.egide.repository.ReportRepository;
+import br.imd.ufrn.egide.repository.UserInfoRepository;
+import br.imd.ufrn.egide.utils.exception.BusinessException;
+import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class NotificationServiceImpl implements NotificationService {
+
+    private final NotificationRepository notificationRepository;
+    private final UserInfoRepository userInfoRepository;
+    private final ReportRepository reportRepository;
+
+    @Override
+    @Transactional
+    public void notifyDenouncedPhase3Started(Long reportId, Long denouncedUserId) {
+        if (reportId == null || denouncedUserId == null) {
+            throw new BusinessException("Parâmetros inválidos para notificação.", HttpStatus.BAD_REQUEST);
+        }
+
+        ReportEntity report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manifestação não encontrada"));
+
+        UserInfoEntity denounced = userInfoRepository.findById(denouncedUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário denunciado não encontrado"));
+
+        String protocol = report.getProtocolNumber() != null ? report.getProtocolNumber() : String.valueOf(report.getId());
+
+        NotificationEntity notification = new NotificationEntity();
+        notification.setRecipient(denounced);
+        notification.setReport(report);
+        notification.setType(NotificationType.PHASE3_STARTED);
+        notification.setTitle("Defesa aberta");
+        notification.setMessage("Você foi indicado como denunciado na manifestação " + protocol + ". Envie sua defesa.");
+
+        notificationRepository.save(notification);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationResponseDTO> listMyNotifications() {
+        UserInfoEntity user = currentUser();
+        return notificationRepository.findByRecipientIdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long getUnreadCount() {
+        UserInfoEntity user = currentUser();
+        return notificationRepository.countByRecipientIdAndReadAtIsNull(user.getId());
+    }
+
+    @Override
+    @Transactional
+    public void markAsRead(Long notificationId) {
+        if (notificationId == null) {
+            throw new BusinessException("Notificação inválida.", HttpStatus.BAD_REQUEST);
+        }
+
+        UserInfoEntity user = currentUser();
+        NotificationEntity notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notificação não encontrada"));
+
+        if (notification.getRecipient() == null || !Objects.equals(notification.getRecipient().getId(), user.getId())) {
+            throw new BusinessException("Você não tem permissão para acessar esta notificação.", HttpStatus.FORBIDDEN);
+        }
+
+        if (notification.getReadAt() == null) {
+            notification.setReadAt(LocalDateTime.now());
+            notificationRepository.save(notification);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void markAllAsRead() {
+        UserInfoEntity user = currentUser();
+        notificationRepository.markAllAsRead(user.getId(), LocalDateTime.now());
+    }
+
+    private NotificationResponseDTO toDTO(NotificationEntity entity) {
+        return new NotificationResponseDTO(
+                entity.getId(),
+                entity.getType(),
+                entity.getTitle(),
+                entity.getMessage(),
+                entity.getCreatedAt(),
+                entity.getReadAt(),
+                entity.getReport() != null ? entity.getReport().getId() : null
+        );
+    }
+
+    private UserInfoEntity currentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        if (username == null) {
+            throw new BusinessException("Usuário não autenticado", HttpStatus.UNAUTHORIZED);
+        }
+        return userInfoRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário autenticado não encontrado"));
+    }
+}

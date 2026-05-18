@@ -26,4 +26,8 @@ public class FileEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "appeal_id")
     private AppealEntity appeal;
+
+    @ManyToOne
+    @JoinColumn(name = "defense_id")
+    private DefenseEntity defense;
 }

@@ -18,6 +18,7 @@ public record PreliminaryReportRequestDTO(
         String justification,
         PenaltyType penaltyType,
         String penaltyDescription,
-        String aiSuggestion
+        String aiSuggestion,
+        Long denouncedUserId
 ) {
 }

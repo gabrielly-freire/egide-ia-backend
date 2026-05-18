@@ -245,8 +245,8 @@ public class AppealServiceImpl implements AppealService {
                                                AppellantRole hint) {
         boolean isDenunciante = report.getUserInfo() != null
                 && Objects.equals(report.getUserInfo().getId(), appellant.getId());
-        boolean isDenunciado = report.getDenunciadoUser() != null
-                && Objects.equals(report.getDenunciadoUser().getId(), appellant.getId());
+        boolean isDenunciado = report.getDenouncedUser() != null
+                && Objects.equals(report.getDenouncedUser().getId(), appellant.getId());
 
         // Bloqueia usuários sem vínculo com o caso (exceto ADMIN, que pode usar o hint).
         if (!isDenunciante && !isDenunciado && appellant.getRole() != Role.ADMIN) {

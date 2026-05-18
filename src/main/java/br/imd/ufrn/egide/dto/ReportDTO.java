@@ -3,6 +3,7 @@ package br.imd.ufrn.egide.dto;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 // DTO de saída principal da manifestação; retornado nos endpoints de listagem e consulta.
 // Para usuários com papel MANAGER, o título e a descrição podem ser substituídos pelas versões
@@ -26,6 +27,8 @@ public record ReportDTO(
 
         Long ouvidorId,
 
-        String ouvidorName
+        String ouvidorName,
+
+        LocalDateTime createdAt
 ) {
 }

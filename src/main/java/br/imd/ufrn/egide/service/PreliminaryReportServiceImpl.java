@@ -20,6 +20,7 @@ import br.imd.ufrn.egide.utils.exception.BusinessException;
 import br.imd.ufrn.egide.utils.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
     private final ReportProcessedRepository reportProcessedRepository;
     private final PreliminaryReportRepository preliminaryReportRepository;
     private final UserInfoRepository userInfoRepository;
+    private final NotificationService notificationService;
 
     // Chama o microserviço de IA para obter sugestão de resposta usando dados anonimizados quando disponíveis.
     @Override
@@ -62,7 +64,6 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         );
     }
 
-    // Valida e persiste o parecer; avança status para PRELIMINARY_ISSUED ou CLOSED_NO_PROOFS conforme a decisão.
     @Override
     @Transactional
     public PreliminaryReportResponseDTO submit(Long reportId, PreliminaryReportRequestDTO request) {
@@ -97,10 +98,25 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
         entity.setSubmittedAt(LocalDateTime.now());
         entity = preliminaryReportRepository.save(entity);
 
-        ReportStatus newStatus = request.decision() == PreliminaryReportDecision.NEGAR_FALTA_PROVAS
-                ? ReportStatus.CLOSED_NO_PROOFS
-                : ReportStatus.PRELIMINARY_ISSUED;
-        report.setStatus(newStatus);
+        ReportStatus newStatus;
+        if (request.decision() == PreliminaryReportDecision.NEGAR_FALTA_PROVAS) {
+            newStatus = ReportStatus.CLOSED_NO_PROOFS;
+            report.setStatus(newStatus);
+            report.setDenouncedUser(null);
+            report.setPhase3NotifiedAt(null);
+        } else {
+            UserInfoEntity denounced = userInfoRepository.findById(request.denouncedUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário denunciado não encontrado"));
+
+            newStatus = ReportStatus.DEFENSE_OPEN;
+            report.setStatus(newStatus);
+            report.setDenouncedUser(denounced);
+
+            if (report.getPhase3NotifiedAt() == null) {
+                notificationService.notifyDenouncedPhase3Started(report.getId(), denounced.getId());
+                report.setPhase3NotifiedAt(LocalDateTime.now());
+            }
+        }
 
         ReportProcessedEntity processed = reportProcessedRepository.findByReportId(reportId).orElse(null);
         if (processed != null) {
@@ -139,13 +155,17 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
                 }
             }
         }
+        if (request.decision() != PreliminaryReportDecision.NEGAR_FALTA_PROVAS && request.denouncedUserId() == null) {
+            throw new BusinessException(
+                    "O usuário denunciado é obrigatório para avançar o caso para a defesa do denunciado.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
     }
 
     // Retorna o usuário autenticado garantindo que é LISTENER ou ADMIN.
     private UserInfoEntity requireOuvidor() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserInfoEntity user = userInfoRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário autenticado não encontrado"));
+        UserInfoEntity user = currentUser();
         if (user.getRole() != Role.LISTENER && user.getRole() != Role.ADMIN) {
             throw new BusinessException(
                     "Apenas Ouvidores podem emitir parecer preliminar.",
@@ -210,5 +230,15 @@ public class PreliminaryReportServiceImpl implements PreliminaryReportService {
                 report.getStatus() != null ? report.getStatus().name() : null,
                 entity.getSubmittedAt()
         );
+    }
+
+    private UserInfoEntity currentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth != null ? auth.getName() : null;
+        if (username == null) {
+            throw new BusinessException("Usuário não autenticado", HttpStatus.UNAUTHORIZED);
+        }
+        return userInfoRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário autenticado não encontrado"));
     }
 }

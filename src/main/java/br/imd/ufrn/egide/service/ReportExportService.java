@@ -75,11 +75,11 @@ public class ReportExportService {
             PdfWriter.getInstance(document, baos);
             document.open();
 
-            Font titleFont  = new Font(Font.HELVETICA, 18, Font.BOLD);
+            Font titleFont = new Font(Font.HELVETICA, 18, Font.BOLD);
             Font sectionFont = new Font(Font.HELVETICA, 13, Font.BOLD);
-            Font boldFont   = new Font(Font.HELVETICA, 12, Font.BOLD);
+            Font boldFont = new Font(Font.HELVETICA, 12, Font.BOLD);
             Font normalFont = new Font(Font.HELVETICA, 12, Font.NORMAL);
-            Font mutedFont  = new Font(Font.HELVETICA, 10, Font.ITALIC);
+            Font mutedFont = new Font(Font.HELVETICA, 10, Font.ITALIC);
 
             Paragraph title = new Paragraph("RELATÓRIO DE GOVERNANÇA — EGIDE", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);

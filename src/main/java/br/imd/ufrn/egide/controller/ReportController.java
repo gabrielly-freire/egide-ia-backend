@@ -176,4 +176,16 @@ public class ReportController {
                 .header("Content-Disposition", "attachment; filename=relatorio-" + id + ".pdf")
                 .body(pdf);
     }
+
+    @GetMapping("/exportar-governanca")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    @Operation(summary = "Gera o PDF de governança com métricas consolidadas do sistema")
+    public ResponseEntity<byte[]> exportarGovernanca() {
+        byte[] pdf = exportService.generateGovernancePdf();
+        String filename = "governanca-" + java.time.LocalDate.now() + ".pdf";
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=" + filename)
+                .body(pdf);
+    }
 }
